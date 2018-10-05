@@ -116,4 +116,39 @@ public class HashFunctions {
 		// == ((multiplier << 1) << 1) << 1) << 1) - multiplier == (multiplier << 5) - multiplier
 		return (multiplier << 5) - multiplier;
 	}
+	
+	public static boolean isPrime(int toCheck, int[] knownPrimes)
+	{
+		double half = toCheck / 2;
+		
+		for (int i = 0; i < knownPrimes.length; i++)
+		{
+			
+		}
+		return false;
+	}
+	
+	private static int[] knownPrimes(int upTo, int[] knownPrimes)
+	{
+		int lastKnown = 2;
+		double half = upTo / 2;
+		if (knownPrimes.length > 0)
+		{
+			lastKnown = knownPrimes[knownPrimes.length - 1];
+		}
+		// only need to check numbers less than half and then the number itself
+		if (lastKnown >= upTo)
+		{
+			return knownPrimes;
+		}
+		else if (lastKnown >= half)
+		{
+			if (isPrime(upTo, knownPrimes))
+			{
+				return knownPrimes.clone();
+			}
+		}
+		
+		return new int[1];
+	}
 }
