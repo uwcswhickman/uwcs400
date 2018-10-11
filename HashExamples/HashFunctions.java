@@ -1,4 +1,4 @@
-
+// Hello X-Team Blue
 public class HashFunctions {
 	
 	/**
