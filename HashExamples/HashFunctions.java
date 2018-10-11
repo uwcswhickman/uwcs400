@@ -151,4 +151,4 @@ public class HashFunctions {
 		
 		return new int[1];
 	}
-}
+}//GO TEAM BLUE!!
