@@ -1,4 +1,4 @@
-
+// Hello X-Team Blue
 public class HashFunctions {
 	
 	/**
@@ -17,7 +17,7 @@ public class HashFunctions {
 		return rtn;
 	}
 	
-	/**
+	/******
 	 * Recreate Java's string hashing function using bit shifting
 	 * @param key - the string to hash
 	 * @return hash value for given string, using same logic as Java's built in string hasher
@@ -151,4 +151,4 @@ public class HashFunctions {
 		
 		return new int[1];
 	}
-}
+}//GO TEAM BLUE!!
