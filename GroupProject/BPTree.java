@@ -21,7 +21,14 @@ import java.util.Random;
  * @param <V> value - expect a user-defined type that stores all data for a food item
  */
 public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
-
+	
+	// to distinguish internal vs. leaf for splitting operations
+	enum NodeType
+	{
+		Internal,
+		Leaf
+	}
+	
     // Root of the tree
     private Node root;
     
@@ -29,6 +36,48 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
     // for internal nodes of the tree
     private int branchingFactor;
     
+    // for determining size of sibling during split
+    // if branchingFactor is even, then siblingSize = branchingFactor / 2
+    // if branchingFactor is odd, then siblingSize = (branchingFactor + 1) / 2 
+    private int siblingSize;
+    
+    // temporary print tag for testing the LeafNode links for in-order printing
+    private String inOrderPrint()
+    {
+    	StringBuilder sb = new StringBuilder();
+    	
+    	Node current = this.root;
+    	
+    	boolean leafFound = false;
+    	while (!leafFound)
+    	{
+    		if (current.type == NodeType.Leaf)
+    		{
+    			leafFound = true;
+    		}
+    		else
+    		{
+    			@SuppressWarnings("unchecked")
+				InternalNode asInternal = (InternalNode)current;
+    			current = asInternal.children.get(0);
+    		}
+    	}
+    	
+    	@SuppressWarnings("unchecked")
+		LeafNode asLeaf = (LeafNode)current;
+    	
+    	while (asLeaf != null)
+    	{
+    		for (V val: asLeaf.values)
+        	{
+        		sb.append(val.toString() + ", ");
+        	}
+    		asLeaf = asLeaf.next;
+    	}
+    	
+    	
+    	return sb.toString();
+    }
     
     /**
      * Public constructor
@@ -40,31 +89,79 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
             throw new IllegalArgumentException(
                "Illegal branching factor: " + branchingFactor);
         }
-        // TODO : Complete
+        this.branchingFactor = branchingFactor;
+        this.siblingSize = (branchingFactor + 1) / 2;	// integer division, so remainder gets dropped
+        
+        this.root = new LeafNode();
     }
     
     
-    /*
-     * (non-Javadoc)
-     * @see BPTreeADT#insert(java.lang.Object, java.lang.Object)
+    /**
+     * Inserts the key and value in the appropriate nodes in the tree
+     * 
+     * Note: key-value pairs with duplicate keys can be inserted into the tree.
+     * 
+     * @param key
+     * @param value
      */
     @Override
     public void insert(K key, V value) {
-        // TODO : Complete
+    	
+    	// special case of the root being a leafNode, in which case we need to update the root to be an internal node
+    	this.root.insert(key, value);
+    	if (this.root.shouldSplit())
+    	{
+    		Node newSibling = this.root.split();
+    		Node oldRoot = this.root;
+    		InternalNode newRoot = new InternalNode();
+    		newRoot.children.add(newSibling);
+    		newRoot.children.add(oldRoot);
+    		if (this.root.type == NodeType.Internal)
+    		{
+    			K middleKey = oldRoot.keys.remove(0);
+    			newRoot.keys.add(middleKey);
+    		}
+    		else
+    		{
+    			newRoot.keys.add(oldRoot.getFirstLeafKey());
+    		}
+    		this.root = newRoot;
+    	}
     }
     
-    
-    /*
-     * (non-Javadoc)
-     * @see BPTreeADT#rangeSearch(java.lang.Object, java.lang.String)
+    /**
+     * Gets the values that satisfy the given range 
+     * search arguments.
+     * 
+     * Value of comparator can be one of these: 
+     * "<=", "==", ">="
+     * 
+     * Example:
+     *     If given key = 2.5 and comparator = ">=":
+     *         return all the values with the corresponding 
+     *      keys >= 2.5
+     *      
+     * If key is null or not found, return empty list.
+     * If comparator is null, empty, or not according
+     * to required form, return empty list.
+     * 
+     * @param key to be searched
+     * @param comparator is a string
+     * @return list of values that are the result of the 
+     * range search; if nothing found, return empty list
      */
     @Override
     public List<V> rangeSearch(K key, String comparator) {
         if (!comparator.contentEquals(">=") && 
             !comparator.contentEquals("==") && 
             !comparator.contentEquals("<=") )
-            return new ArrayList<V>();
-        // TODO : Complete
+        {
+        	return new ArrayList<V>();
+        }
+        if (key == null)
+        {
+        	return new ArrayList<V>();
+        }
         return null;
     }
     
@@ -113,14 +210,16 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
      */
     private abstract class Node {
         
-        // List of keys
+    	// List of keys
         List<K> keys;
+        
+        NodeType type;
         
         /**
          * Package constructor
          */
         Node() {
-            // TODO : Complete
+            this.keys = new LinkedList<K>();
         }
         
         /**
@@ -158,6 +257,15 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
          */
         abstract boolean isOverflow();
         
+        /**
+         * tell parent whether you need to split
+         * Will be different criteria for leaf vs. internal, since internal 
+         * can have branchingFactor - 1 number of keys, but leaf can have 
+         * branchingFactor number of keys
+         * @return
+         */
+        abstract boolean shouldSplit();
+        
         public String toString() {
             return keys.toString();
         }
@@ -182,7 +290,8 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
          */
         InternalNode() {
             super();
-            // TODO : Complete
+            this.children = new LinkedList<Node>();
+            this.type = NodeType.Internal;
         }
         
         /**
@@ -190,8 +299,7 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
          * @see BPTree.Node#getFirstLeafKey()
          */
         K getFirstLeafKey() {
-            // TODO : Complete
-            return null;
+            return this.children.get(0).getFirstLeafKey();
         }
         
         /**
@@ -203,12 +311,53 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
             return false;
         }
         
+        boolean shouldSplit()
+        {
+        	if (this.children.size() > branchingFactor)
+        	{
+        		return true;
+        	}
+        	else
+        	{
+        		return false;
+        	}
+        }
+        
         /**
          * (non-Javadoc)
          * @see BPTree.Node#insert(java.lang.Comparable, java.lang.Object)
          */
         void insert(K key, V value) {
-            // TODO : Complete
+        	int i = 0;
+        	// children will be in order, so this iterator will be in order
+        	for (K nxtKey: this.keys)
+        	{
+        		if (key.compareTo(nxtKey) < 0)
+        		{
+        			break;
+        		}
+        		else
+        		{
+        			i++;
+        		}
+        	}
+        	
+        	Node child = this.children.get(i);
+			child.insert(key, value);
+			if (child.shouldSplit())  // should be == ?
+			{
+				Node sibling = child.split();
+				this.children.add(i, sibling);
+				if (child.type == NodeType.Internal)
+				{
+					K middleKey = child.keys.remove(0);
+					this.keys.add(i, middleKey);
+				}
+				else
+				{
+					this.keys.add(i, child.getFirstLeafKey());
+				}
+			}
         }
         
         /**
@@ -216,8 +365,19 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
          * @see BPTree.Node#split()
          */
         Node split() {
-            // TODO : Complete
-            return null;
+        	InternalNode newSibling = new InternalNode();
+            for (int i = 0; i < siblingSize - 1; i++)
+            {
+            	K nxtKey = this.keys.remove(0);	// linked list, so this is fast
+            	Node nxtChild = this.children.remove(0);
+            	newSibling.keys.add(nxtKey);  // linked list, so this goes at the end, and it will be in order too because of the way we're looping on the current node
+            	newSibling.children.add(nxtChild);
+            }
+            // there's one more child than there is key, and we took x number of keys, so we need to take x+1 children
+            Node middleChild = this.children.remove(0);
+            newSibling.children.add(middleChild);
+            
+            return newSibling;
         }
         
         /**
@@ -256,17 +416,16 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
          */
         LeafNode() {
             super();
-            // TODO : Complete
+            this.values = new LinkedList<V>();
+            this.type = NodeType.Leaf;
         }
-        
         
         /**
          * (non-Javadoc)
          * @see BPTree.Node#getFirstLeafKey()
          */
         K getFirstLeafKey() {
-            // TODO : Complete
-            return null;
+            return this.keys.get(0);
         }
         
         /**
@@ -278,12 +437,52 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
             return false;
         }
         
+        boolean shouldSplit()
+        {
+        	if (this.keys.size() > branchingFactor)
+        	{
+        		return true;
+        	}
+        	else
+        	{
+        		return false;
+        	}
+        }
+        
         /**
          * (non-Javadoc)
          * @see BPTree.Node#insert(Comparable, Object)
          */
         void insert(K key, V value) {
-            // TODO : Complete
+    		int i = 0; 
+    		boolean duplicate = false;
+    		for (K nxt: this.keys)
+    		{
+    			int compareTo = key.compareTo(nxt);
+    			if (compareTo > 0)
+    			{
+    				i++;
+    			}
+    			else if (compareTo == 0)
+    			{
+    				duplicate = true;
+    				break;
+    			}
+    			else
+    			{
+    				break;
+    			}
+    		}
+    		if (duplicate)
+    		{
+    			this.values.set(i, value);
+    		}
+    		else
+    		{
+    			// this is dumb, because we're retracing our steps here; would be better to implement our own custom in-order linked list, but maybe i'll come back to that. 
+    			this.keys.add(i, key);
+    			this.values.add(i, value);
+    		}
         }
         
         /**
@@ -291,8 +490,27 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
          * @see BPTree.Node#split()
          */
         Node split() {
-            // TODO : Complete
-            return null;
+        	// debug System.out.println("Before: this = " + valStr(this) + ": this.previous = " + valStr(this.previous) + ", this.next = " + valStr(this.next));
+        	LeafNode newSibling = new LeafNode();
+            for (int i = 0; i < siblingSize; i++)
+            {
+            	K nxtKey = this.keys.remove(0);	// linked list, so this is fast
+            	V nxtValue = this.values.remove(0);
+            	newSibling.keys.add(nxtKey);  // linked list, so this goes at the end, and it will be in order too because of the way we're looping on the current node
+            	newSibling.values.add(nxtValue);
+            }
+            newSibling.next = this;
+            LeafNode previous = this.previous;
+            newSibling.previous = previous;
+            if (previous != null)
+            {
+            	previous.next = newSibling;
+            }
+            this.previous = newSibling;
+            // debug System.out.println("After: this = " + valStr(this) + ": this.previous = " + valStr(this.previous) + ", this.next = " + valStr(this.next));
+            // debug System.out.println("After: newSibling = " + valStr(newSibling) + ": newSibling.previous = " + valStr(newSibling.previous) + ", newSibling.next = " + valStr(newSibling.next));
+            
+            return newSibling;
         }
         
         /**
@@ -302,6 +520,22 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
         List<V> rangeSearch(K key, String comparator) {
             // TODO : Complete
             return null;
+        }
+        String valStr(LeafNode n)
+        {
+        	if (n == null)
+        	{
+        		return "null";
+        	}
+        	else 
+        	{
+        		StringBuilder sb = new StringBuilder();
+            	for (V val: n.values)
+            	{
+            		sb.append(val + ", ");
+            	}
+            	return sb.toString();
+        	}
         }
         
     } // End of class LeafNode
@@ -316,13 +550,11 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
      */
     public static void main(String[] args) {
         // create empty BPTree with branching factor of 3
-        BPTree<Double, Double> bpTree = new BPTree<>(3);
+        BPTree<Double, Double> bpTree = new BPTree<>(5);
 
         // create a pseudo random number generator
-        Random rnd1 = new Random();
-
-        // some value to add to the BPTree
-        Double[] dd = {0.0d, 0.5d, 0.2d, 0.8d};
+        Double[] inputs = new Double[] { 10d, 14d, 15d, 23d, 25d, 13d, 47d, 5d, 53d, 17d, 21d, 63d, 89d, 55d, 91d, 79d, 57d };
+        Double[] inOrder = new Double[] { 5d, 10d, 13d, 14d, 15d, 17d, 21d, 23d, 25d, 47d, 53d, 55d, 57d, 63d, 79d, 89d, 91d };
 
         // build an ArrayList of those value and add to BPTree also
         // allows for comparing the contents of the ArrayList 
@@ -330,15 +562,20 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
         // does not ensure BPTree is implemented correctly
         // just that it functions as a data structure with
         // insert, rangeSearch, and toString() working.
-        List<Double> list = new ArrayList<>();
-        for (int i = 0; i < 400; i++) {
-            Double j = dd[rnd1.nextInt(4)];
-            list.add(j);
-            bpTree.insert(j, j);
+        for (int i = 0; i < inputs.length; i++) {
+        	System.out.println();
+        	System.out.println("Inserting " + inputs[i]);
+        	System.out.println();
+            bpTree.insert(inputs[i], inputs[i]);
             System.out.println("\n\nTree structure:\n" + bpTree.toString());
+            System.out.println(bpTree.inOrderPrint());
         }
-        List<Double> filteredValues = bpTree.rangeSearch(0.2d, ">=");
-        System.out.println("Filtered values: " + filteredValues.toString());
+        for (Double d: inOrder)
+        {
+        	System.out.print(d + ", ");
+        }
+        //List<Double> filteredValues = bpTree.rangeSearch(0.2d, ">=");
+        //System.out.println("Filtered values: " + filteredValues.toString());
     }
 
 } // End of class BPTree
