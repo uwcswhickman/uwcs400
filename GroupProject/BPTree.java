@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Queue;
 
 /**
+ * TODO: Need to handle duplicates. Not currently accounting for that
+ * 
  * Implementation of a B+ tree to allow efficient access to
  * many different indexes of a large data set. 
  * BPTree objects are created for each type of index
