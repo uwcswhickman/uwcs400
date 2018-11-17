@@ -370,23 +370,17 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
         	// if less than, then we just need to get to the beginning of the list. 
         	if (comparator.contentEquals("<="))
         	{
-        		// if the argument key is smaller than everything in our tree, then no sense moving on
-        		if (key.compareTo(this.getFirstLeafKey()) >= 0)
-        		{
-        			Node child = this.children.get(0);
-        			return child.rangeSearch(key, comparator);
-        		}
-        		else
-        		{
-        			return new LinkedList<V>();
-        		}
+    			Node child = this.children.get(0);
+    			return child.rangeSearch(key, comparator);
         	}
         	// if >= or ==, we need to go find a leaf with that key (or maybe one that's just smaller or just bigger, if it's not in the list)
         	else
         	{
         		for (K nxtKey: this.keys)
             	{
-            		if (key.compareTo(nxtKey) < 0)
+        			// if you're less than, then you should be in the child that comes before it
+        			// if equal, then you might be in the child that comes right before it (due to duplicates)
+            		if (key.compareTo(nxtKey) <= 0)
             		{
             			break;
             		}
@@ -465,34 +459,21 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
          */
         void insert(K key, V value) {
     		int i = 0; 
-    		boolean duplicate = false;
     		for (K nxt: this.keys)
     		{
-    			int compareTo = key.compareTo(nxt);
-    			if (compareTo > 0)
+    			if (key.compareTo(nxt) > 0)
     			{
     				i++;
     			}
-    			else if (compareTo == 0)
-    			{
-    				duplicate = true;
-    				break;
-    			}
-    			else
+    			else 
     			{
     				break;
     			}
     		}
-    		if (duplicate)
-    		{
-    			this.values.set(i, value);
-    		}
-    		else
-    		{
-    			// this is dumb, because we're retracing our steps here; would be better to implement our own custom in-order linked list, but maybe i'll come back to that. 
-    			this.keys.add(i, key);
-    			this.values.add(i, value);
-    		}
+		
+			// this is dumb, because we're retracing our steps here; would be better to implement our own custom in-order linked list, but maybe i'll come back to that. 
+			this.keys.add(i, key);
+			this.values.add(i, value);
         }
         
         /**
@@ -612,11 +593,11 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
      */
     public static void main(String[] args) {
         // create empty BPTree with branching factor of 3
-        BPTree<Double, Double> bpTree = new BPTree<>(3);
+        BPTree<Double, Double> bpTree = new BPTree<>(7);
 
         // create a pseudo random number generator
-        Double[] inputs = new Double[] { 10d, 14d, 15d, 23d, 25d, 13d, 47d, 5d, 53d, 17d, 21d, 63d, 89d, 55d, 91d, 79d, 57d };
-        Double[] inOrder = new Double[] { 5d, 10d, 13d, 14d, 15d, 17d, 21d, 23d, 25d, 47d, 53d, 55d, 57d, 63d, 79d, 89d, 91d };
+        Double[] inputs = new Double[] { 91d, 91d, 10d, 14d, 91d, 89d, 15d, 23d, 91d, 25d, 89d, 13d, 91d, 47d, 89d, 91d, 5d, 53d, 91d, 89d, 17d, 21d, 91d, 89d, 63d, 89d, 91d, 55d, 91d, 79d, 91d, 57d, 5d, 5d, 5d, 91d, 5d, 5d, 91d, 5d, 5d, 5d, 91d, 5d, 5d };
+        Double[] inOrder = new Double[] { 5d, 5d, 5d, 5d, 5d, 5d, 5d, 5d, 5d, 5d, 5d, 10d, 13d, 14d, 15d, 17d, 21d, 23d, 25d, 47d, 53d, 55d, 57d, 63d, 79d, 89d, 89d, 89d, 89d, 89d, 89d, 91d, 91d, 91d, 91d, 91d, 91d, 91d, 91d, 91d, 91d, 91d, 91d, 91d, 91d };
 
         // build an ArrayList of those value and add to BPTree also
         // allows for comparing the contents of the ArrayList 
@@ -625,21 +606,37 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
         // just that it functions as a data structure with
         // insert, rangeSearch, and toString() working.
         for (int i = 0; i < inputs.length; i++) {
-        	System.out.println();
-        	System.out.println("Inserting " + inputs[i]);
-        	System.out.println();
+        	//System.out.println();
+        	//System.out.println("Inserting " + inputs[i]);
+        	//System.out.println();
             bpTree.insert(inputs[i], inputs[i]);
-            System.out.println("\n\nTree structure:\n" + bpTree.toString());
-            System.out.println("Tree sorted:   " + bpTree.inOrderPrint());
+            //System.out.println("\n\nTree structure:\n" + bpTree.toString());
+            //System.out.println("Tree sorted:   " + bpTree.inOrderPrint());
         }
-        System.out.print("Correct order: "); 
+        StringBuilder sb = new StringBuilder();
+        //System.out.print("Correct order: "); 
         for (Double d: inOrder)
         {
-        	System.out.print(d + ", ");
+        	sb.append(d);
+        	sb.append(", ");
         }
-        System.out.println();
-        List<Double> filteredValues = bpTree.rangeSearch(63d, "<=");
-        System.out.println("rangeSearch(63,\"<=\"): " + filteredValues.toString());
+        String expected = sb.toString();
+        
+        String actual = bpTree.inOrderPrint();
+        
+        if (!actual.contentEquals(expected))
+        {
+        	System.out.println("In order traversal returned unexpected results");
+        	System.out.println("Expected: " + expected);
+        	System.out.println("Actual: " + actual);
+        }
+        else
+        {
+        	System.out.println("All tests passed!");
+        }
+        //System.out.println();
+        //List<Double> filteredValues = bpTree.rangeSearch(63d, ">=");
+        //System.out.println("rangeSearch(63,\"<=\"): " + filteredValues.toString());
     }
 
 } // End of class BPTree
