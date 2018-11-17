@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Random;
 
 /**
  * Implementation of a B+ tree to allow efficient access to
@@ -41,43 +40,6 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
     // if branchingFactor is odd, then siblingSize = (branchingFactor + 1) / 2 
     private int siblingSize;
     
-    // temporary print tag for testing the LeafNode links for in-order printing
-    private String inOrderPrint()
-    {
-    	StringBuilder sb = new StringBuilder();
-    	
-    	Node current = this.root;
-    	
-    	boolean leafFound = false;
-    	while (!leafFound)
-    	{
-    		if (current.type == NodeType.Leaf)
-    		{
-    			leafFound = true;
-    		}
-    		else
-    		{
-    			@SuppressWarnings("unchecked")
-				InternalNode asInternal = (InternalNode)current;
-    			current = asInternal.children.get(0);
-    		}
-    	}
-    	
-    	@SuppressWarnings("unchecked")
-		LeafNode asLeaf = (LeafNode)current;
-    	
-    	while (asLeaf != null)
-    	{
-    		for (V val: asLeaf.values)
-        	{
-        		sb.append(val.toString() + ", ");
-        	}
-    		asLeaf = asLeaf.next;
-    	}
-    	
-    	
-    	return sb.toString();
-    }
     
     /**
      * Public constructor
@@ -152,25 +114,42 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
      */
     @Override
     public List<V> rangeSearch(K key, String comparator) {
-        if (!comparator.contentEquals(">=") && 
+    	if (key == null || comparator == null)
+        {
+        	return new ArrayList<V>();
+        }
+    	if (!comparator.contentEquals(">=") && 
             !comparator.contentEquals("==") && 
             !comparator.contentEquals("<=") )
         {
         	return new ArrayList<V>();
         }
-        if (key == null)
-        {
-        	return new ArrayList<V>();
-        }
-        return null;
+        
+    	return this.root.rangeSearch(key, comparator);
     }
     
+ // temporary print tag for testing the LeafNode links for in-order printing
+    private String inOrderPrint()
+    {
+    	List<V> rtnList = this.rangeSearch(this.root.getFirstLeafKey(), ">=");
+    	
+    	StringBuilder sb = new StringBuilder();
+    	
+    	for (V val: rtnList)
+    	{
+    		sb.append(val.toString());
+    		sb.append(", ");
+    	}
+    	
+    	return sb.toString();
+    }
     
     /*
      * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public String toString() {
         Queue<List<Node>> queue = new LinkedList<List<Node>>();
         queue.add(Arrays.asList(root));
@@ -385,8 +364,37 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
          * @see BPTree.Node#rangeSearch(java.lang.Comparable, java.lang.String)
          */
         List<V> rangeSearch(K key, String comparator) {
-            // TODO : Complete
-            return null;
+        	int idx = 0;
+        	// if less than, then we just need to get to the beginning of the list. 
+        	if (comparator.contentEquals("<="))
+        	{
+        		// if the argument key is smaller than everything in our tree, then no sense moving on
+        		if (key.compareTo(this.getFirstLeafKey()) >= 0)
+        		{
+        			Node child = this.children.get(0);
+        			return child.rangeSearch(key, comparator);
+        		}
+        		else
+        		{
+        			return new LinkedList<V>();
+        		}
+        	}
+        	// if >= or ==, we need to go find a leaf with that key (or maybe one that's just smaller or just bigger, if it's not in the list)
+        	else
+        	{
+        		for (K nxtKey: this.keys)
+            	{
+            		if (key.compareTo(nxtKey) < 0)
+            		{
+            			break;
+            		}
+            		else
+            		{
+            			idx++;
+            		}
+            	}
+        		return this.children.get(idx).rangeSearch(key, comparator);
+        	}
         }
     
     } // End of class InternalNode
@@ -490,7 +498,7 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
          * @see BPTree.Node#split()
          */
         Node split() {
-        	// debug System.out.println("Before: this = " + valStr(this) + ": this.previous = " + valStr(this.previous) + ", this.next = " + valStr(this.next));
+        	
         	LeafNode newSibling = new LeafNode();
             for (int i = 0; i < siblingSize; i++)
             {
@@ -507,8 +515,6 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
             	previous.next = newSibling;
             }
             this.previous = newSibling;
-            // debug System.out.println("After: this = " + valStr(this) + ": this.previous = " + valStr(this.previous) + ", this.next = " + valStr(this.next));
-            // debug System.out.println("After: newSibling = " + valStr(newSibling) + ": newSibling.previous = " + valStr(newSibling.previous) + ", newSibling.next = " + valStr(newSibling.next));
             
             return newSibling;
         }
@@ -518,24 +524,78 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
          * @see BPTree.Node#rangeSearch(Comparable, String)
          */
         List<V> rangeSearch(K key, String comparator) {
-            // TODO : Complete
-            return null;
-        }
-        String valStr(LeafNode n)
-        {
-        	if (n == null)
+        	
+        	List<V> rtnList = new LinkedList<V>(); // use linked list because adding should be fast
+        	// if less than, then start at the beginning of our list
+        	if (comparator.contentEquals("<="))
         	{
-        		return "null";
+        		
+        		// if we have an internal node parent, then this check has already been performed for us, but not if the root is a leaf
+        		if (key.compareTo(this.getFirstLeafKey()) >= 0) // make sure we have something to return
+        		{
+        			int idx = 0;
+        			boolean contToNxt = true;
+            		for (K nxtKey: this.keys)
+            		{
+            			if (nxtKey.compareTo(key) <= 0)
+            			{
+            				rtnList.add(this.values.get(idx));
+            				idx++;
+            			}
+            			else
+            			{
+            				contToNxt = false;
+            				break;
+            			}
+            		}
+            		if (contToNxt && (this.next != null))
+            		{
+            			rtnList.addAll(this.next.rangeSearch(key, comparator));
+            		}
+        		}
         	}
-        	else 
+        	// if ==, go find it!
+        	else if (comparator.contentEquals("=="))
         	{
-        		StringBuilder sb = new StringBuilder();
-            	for (V val: n.values)
+        		int idx = 0;
+        		for (K nxtKey: this.keys)
             	{
-            		sb.append(val + ", ");
+            		if (nxtKey.compareTo(key) == 0)
+            		{
+            			break;
+            		}
+            		else
+            		{
+            			idx++;
+            		}
             	}
-            	return sb.toString();
+        		rtnList.add(this.values.get(idx));
         	}
+        	// greater than or equal to
+        	else
+        	{
+        		int idx = 0;
+        		for (K nxtKey: this.keys)
+            	{
+            		if (nxtKey.compareTo(key) >= 0)
+            		{
+            			break;
+            		}
+            		else
+            		{
+            			idx++;
+            		}
+            	}
+        		for (int i = idx; i < this.keys.size(); i++)
+        		{
+        			rtnList.add(this.values.get(i));
+        		}
+        		if (this.next != null)
+        		{
+        			rtnList.addAll(this.next.rangeSearch(key, comparator));
+        		}
+        	}
+        	return rtnList;
         }
         
     } // End of class LeafNode
@@ -550,7 +610,7 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
      */
     public static void main(String[] args) {
         // create empty BPTree with branching factor of 3
-        BPTree<Double, Double> bpTree = new BPTree<>(5);
+        BPTree<Double, Double> bpTree = new BPTree<>(3);
 
         // create a pseudo random number generator
         Double[] inputs = new Double[] { 10d, 14d, 15d, 23d, 25d, 13d, 47d, 5d, 53d, 17d, 21d, 63d, 89d, 55d, 91d, 79d, 57d };
@@ -568,14 +628,16 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
         	System.out.println();
             bpTree.insert(inputs[i], inputs[i]);
             System.out.println("\n\nTree structure:\n" + bpTree.toString());
-            System.out.println(bpTree.inOrderPrint());
+            System.out.println("Tree sorted:   " + bpTree.inOrderPrint());
         }
+        System.out.print("Correct order: "); 
         for (Double d: inOrder)
         {
         	System.out.print(d + ", ");
         }
-        //List<Double> filteredValues = bpTree.rangeSearch(0.2d, ">=");
-        //System.out.println("Filtered values: " + filteredValues.toString());
+        System.out.println();
+        List<Double> filteredValues = bpTree.rangeSearch(63d, "<=");
+        System.out.println("rangeSearch(63,\"<=\"): " + filteredValues.toString());
     }
 
 } // End of class BPTree
