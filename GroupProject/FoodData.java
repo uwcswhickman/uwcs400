@@ -4,14 +4,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -22,6 +20,7 @@ import java.util.TreeMap;
  */
 public class FoodData implements FoodDataADT<FoodItem> {
     
+	// used for parsing and organization of food data
 	private enum Nutrient
 	{
 		calories,fat,carbohydrate,fiber,protein;
@@ -29,13 +28,16 @@ public class FoodData implements FoodDataADT<FoodItem> {
     // List of all the food items.
     private List<FoodItem> foodItemList;
     
-    // hashed set of all of food items for quick lookup
+    // food items alphabetically ordered by name
+    private TreeMap<String, FoodItem> sortedByName;
+    
+    // hashed set of all of the food items for quick lookup while applying filters
     private HashSet<FoodItem> foodItemLookup;
     
     // Map of nutrients and their corresponding index
     private HashMap<String, BPTree<Double, FoodItem>> indexes;
     
-    // name lookup index with chunks of size 2 & 5
+    // name lookup index with chunks of size 3 & 5
     private HashMap<String, HashSet<FoodItem>> nameIndex;
         
     /**
@@ -46,68 +48,118 @@ public class FoodData implements FoodDataADT<FoodItem> {
         this.foodItemLookup = new HashSet<FoodItem>();
         this.indexes = new HashMap<String, BPTree<Double, FoodItem>>();
         this.nameIndex = new HashMap<String, HashSet<FoodItem>>();
+        this.sortedByName = new TreeMap<String, FoodItem>();
         for (Nutrient nxt: Nutrient.values())
         {
-        	this.indexes.put(nxt.toString(), new BPTree<Double, FoodItem>(128));
+        	this.indexes.put(nxt.toString(), new BPTree<Double, FoodItem>(3));
         }
     }
     
     
-    /*
-     * (non-Javadoc)
-     * @see skeleton.FoodDataADT#loadFoodItems(java.lang.String)
+    /**
+     * Loads the data in the .csv file
+     * 
+     * file format:
+     * <id1>,<name>,<nutrient1>,<value1>,<nutrient2>,<value2>,...
+     * <id2>,<name>,<nutrient1>,<value1>,<nutrient2>,<value2>,...
+     * 
+     * Example:
+     * 556540ff5d613c9d5f5935a9,Stewarts_PremiumDarkChocolatewithMintCookieCrunch,calories,280,fat,18,carbohydrate,34,fiber,3,protein,3
+     * 
+     * Note:
+     *     1. All the rows are in valid format.
+     *  2. All IDs are unique.
+     *  3. Names can be duplicate.
+     *  4. All columns are strictly alphanumeric (a-zA-Z0-9_).
+     *  5. All food items will strictly contain 5 nutrients in the given order:    
+     *     calories,fat,carbohydrate,fiber,protein
+     *  6. Nutrients are CASE-INSENSITIVE. 
+     * 
+     * @param filePath path of the food item data file 
+     *        (e.g. folder1/subfolder1/.../foodItems.csv) 
      */
     @Override
     public void loadFoodItems(String filePath) {
         
-    	List<String> rawData = getRawData(filePath);
-    	
-    	parseData(rawData);
-    }
-    
-    private void parseData(List<String> rawData)
-    {
-    	for (String nxtLine: rawData)
+    	List<String> rawData = null;
+    	try
     	{
-    		String[] pieces = nxtLine.split(",");
-    		
-    		if (pieces.length >= 12)
-    		{
-    			FoodItem nxtItm = new FoodItem(pieces[0], pieces[1]);
-    			for (int i = 2; i < 12; i++)
-    			{
-    				nxtItm.addNutrient(pieces[i], Double.parseDouble(pieces[++i]));
-    			}
-    			this.addFoodItem(nxtItm);
-    		}
+    		rawData = loadFromFile(filePath);
+    	}
+    	catch (FileNotFoundException e)
+    	{
+    		// I don't love this, but we can't pass errors back with the given method signature, so do nothing
+    	}
+    	if (rawData != null)
+    	{
+    		// parse data and add it to our session's food list
+        	parseData(rawData);
     	}
     }
     
-    private List<String> getRawData(String filePath)
+    /**
+     * Load all lines of data from a file
+     * @param filePath
+     * @throws SecurityException - if a security manager exists and its SecurityManager.checkRead(java.lang.String) method denies read access to the file or directory
+     * @throws FileNotFoundException - if filePath is not found
+     * @return list of data rows from file
+     */
+    private List<String> loadFromFile(String filePath) throws FileNotFoundException
     {
     	List<String> rtnList = new LinkedList<String>();
     	
     	File file = new File( filePath );
 
         if (file.exists())                          
-        {                                             
-			try 
-			{
-				Scanner inFile = new Scanner(file);
-				
-	            while ( inFile.hasNextLine() )
-	            {
-	                rtnList.add(inFile.nextLine()); // save if needed 
-	            }
-	            
-	            // Close the buffered reader input stream attached to the file
-	            inFile.close();
-			} 
-			catch (FileNotFoundException e) { }
+        {
+			Scanner inFile = new Scanner(file);
+			
+            while (inFile.hasNextLine())
+            {
+                rtnList.add(inFile.nextLine());
+            }
+            
+            inFile.close();
         }
         return rtnList;
     }
-
+    
+    /**
+     * Parse raw data in the format specified in loadFoodItems, and if data format matches, adds new FoodItem to the session's list
+     * @param rawData - list of data lines from file
+     */
+    private void parseData(List<String> rawData)
+    {
+    	for (String nxtLine: rawData)
+    	{
+    		String[] pieces = nxtLine.split(",");
+    		boolean valid = true;
+    		if (pieces.length >= 12)
+    		{
+    			FoodItem nxtItm = new FoodItem(pieces[0], pieces[1]);
+    			for (int i = 2; i < 12; i++)
+    			{
+    				try
+    				{
+    					String nutrient = pieces[i].toLowerCase();
+    					Nutrient.valueOf(nutrient);  // throws IllegalArgumentException if not in the list
+        				double value = Double.parseDouble(pieces[++i]);  // throws NumberFormatException if not parse-able. 
+        				nxtItm.addNutrient(nutrient, value);
+    				}
+    				catch (Exception e)
+    				{
+    					valid = false;
+    					break; // break out of for loop for this line, since this line isn't valid
+    				}
+    			}
+    			if (valid)
+    			{
+        			this.addFoodItem(nxtItm);
+    			}
+    		}
+    	}
+    }
+    
     /*
      * (non-Javadoc)
      * @see skeleton.FoodDataADT#filterByName(java.lang.String)
@@ -225,6 +277,8 @@ public class FoodData implements FoodDataADT<FoodItem> {
     public void addFoodItem(FoodItem foodItem) {
         this.foodItemList.add(foodItem);
         this.foodItemLookup.add(foodItem);
+        String sortKey = foodItem.getName() + foodItem.getID();	// combine name and ID, since name isn't guaranteed to be unique
+        this.sortedByName.put(sortKey, foodItem);
         // add to the nutrient index
         for (String nutrient: foodItem.getNutrients().keySet())
         {
@@ -263,7 +317,14 @@ public class FoodData implements FoodDataADT<FoodItem> {
      */
     @Override
     public List<FoodItem> getAllFoodItems() {
-        return this.foodItemList;
+    	LinkedList<FoodItem> rtnList = new LinkedList<FoodItem>();
+
+    	for (FoodItem nxt: this.sortedByName.values())
+    	{
+    		rtnList.add(nxt);
+    	}
+    	
+    	return rtnList;
     }
     
     /**
@@ -272,7 +333,7 @@ public class FoodData implements FoodDataADT<FoodItem> {
      * @param filename name of the file where the data needs to be saved 
      */
     public void saveFoodItems(String filename) {
-    	List<String> formattedAndSorted = formatAndSortData();
+    	List<String> formattedAndSorted = formatAndSortData(this.sortedByName);
     	
     	File file = new File( filename );
     	
@@ -281,7 +342,6 @@ public class FoodData implements FoodDataADT<FoodItem> {
 		{
 	        if (file.createNewFile())                          
 	        {           
-	        	System.out.println("Saving " + formattedAndSorted.size() + " files to " + filename);
 				FileWriter fw = new FileWriter(file);
 				
 				for (String nxt: formattedAndSorted)
@@ -290,45 +350,40 @@ public class FoodData implements FoodDataADT<FoodItem> {
 					fw.write("\r\n");
 				}
 				fw.close();
-				System.out.println("File save successful");
 	        }
 		} 
 		catch (IOException e) { }
     }
     
-    private List<String> formatAndSortData()
+    private List<String> formatAndSortData(TreeMap<String, FoodItem> sortedByName)
     {
     	List<String> rtnList = new LinkedList<String>();
     	
-    	TreeMap<String, FoodItem> sortedNames = new TreeMap<String, FoodItem>();
-    	
-    	for (FoodItem nxt: this.foodItemList)
+    	for (FoodItem nxt: sortedByName.values())
     	{
-    		// combine name with ID so it's unique, since name isn't gauranteed to be unique
-    		sortedNames.put(nxt.getName() + nxt.getID(), nxt);
-    	}
-    	
-    	for (String name: sortedNames.keySet())
-    	{
-    		FoodItem nxt = sortedNames.get(name);
-    		StringBuilder sb = new StringBuilder();
-    		sb.append(nxt.getID());
-    		sb.append(",");
-    		sb.append(nxt.getName());
-    		sb.append(",");
-    		HashMap<String, Double> nutrients = nxt.getNutrients();
-    		Nutrient[] nutrientList = Nutrient.values();
-    		NumberFormat formatter = new DecimalFormat("#0");
-    		for (int i = 0; i < nutrientList.length; i++)
-    		{
-    			sb.append(nutrientList[i]);
-    			sb.append(",");
-    			sb.append(formatter.format(nutrients.get(nutrientList[i].toString())));
-    			sb.append(",");
-    		}
-    		rtnList.add(sb.toString());
+    		rtnList.add(serializeFoodItem(nxt));
     	}
     	return rtnList;
+    }
+    
+    private static String serializeFoodItem(FoodItem item)
+    {
+    	StringBuilder sb = new StringBuilder();
+		sb.append(item.getID());
+		sb.append(",");
+		sb.append(item.getName());
+		sb.append(",");
+		HashMap<String, Double> nutrients = item.getNutrients();
+		Nutrient[] nutrientList = Nutrient.values();
+		NumberFormat formatter = new DecimalFormat("#0");
+		for (int i = 0; i < nutrientList.length; i++)
+		{
+			sb.append(nutrientList[i]);
+			sb.append(",");
+			sb.append(formatter.format(nutrients.get(nutrientList[i].toString())));
+			sb.append(",");
+		}
+		return sb.toString();
     }
     
     public static void main(String[] args) {
@@ -337,12 +392,51 @@ public class FoodData implements FoodDataADT<FoodItem> {
     	data.loadFoodItems(filePath);
     	List<FoodItem> allItems = data.getAllFoodItems();
     	System.out.println(allItems.size() + " items loaded");
-    	List<FoodItem> byName = data.filterByName("Vegetable");
+    	testNameSearch(data, "aigR");
+    	testRules(data);
+    	testSaveData(data);
+    }
+    
+    private static void testSaveData(FoodData data)
+    {
+    	data.saveFoodItems("C:\\WillSource\\CS400\\uwcs400\\GroupProject\\foodItemsMySave.csv");
+    }
+    
+    private static void testNameSearch(FoodData data, String toFind)
+    {
+    	System.out.println("Items containing string \"" + toFind + "\"");
+    	List<FoodItem> byName = data.filterByName(toFind);
     	for (FoodItem nxt: byName)
     	{
     		System.out.println(nxt.getName());
     	}
-    	data.saveFoodItems("C:\\WillSource\\CS400\\uwcs400\\GroupProject\\foodItemsMySave.csv");
+    	System.out.println();
+    }
+    
+    private static void testRules(FoodData data)
+    {
+    	System.out.println("Items passing the following rules:");
+    	List<String> rules = new LinkedList<String>();
+    	rules.add("calories >= 50");
+    	rules.add("calories <= 50");
+    	rules.add("calories == 50");
+    	
+    	for (String nxt: rules)
+    	{
+    		System.out.println(nxt);
+    	}
+    	List<FoodItem> filteredData = data.filterByNutrients(rules);
+    	
+    	for (FoodItem nxt: filteredData)
+    	{
+    		System.out.println(printHelper(nxt, "calories"));
+    	}
+    	System.out.println();
+    }
+    
+    private static String printHelper(FoodItem item, String toShow)
+    {
+    	return item.getName() + ": " + item.getNutrientValue(toShow);
     }
 
 }

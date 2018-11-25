@@ -541,10 +541,18 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
         	else if (comparator.contentEquals("=="))
         	{
         		int idx = 0;
+        		boolean foundAll = false;
         		for (K nxtKey: this.keys)
             	{
-            		if (nxtKey.compareTo(key) == 0)
+        			int compareTo = nxtKey.compareTo(key);
+            		if (compareTo == 0)
             		{
+            			rtnList.add(this.values.get(idx));
+            			idx++;
+            		}
+            		else if (compareTo > 0)
+            		{
+            			foundAll = true;
             			break;
             		}
             		else
@@ -552,7 +560,11 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
             			idx++;
             		}
             	}
-        		rtnList.add(this.values.get(idx));
+        		if (!foundAll && (this.next != null))
+        		{
+        			rtnList.addAll(this.next.rangeSearch(key, comparator));
+        		}
+        		
         	}
         	// greater than or equal to
         	else
