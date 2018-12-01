@@ -1,7 +1,14 @@
 HBox {
+	-fx-padding: 10px;
+	-fx-border-color: black; 
+	-fx-border-width: 1px;
+	-fx-border-style: solid;
+}
+
+VBox {
+	-fx-padding: 10px;
 	-fx-border-color: black;
-	-fx-border-insets: 5;
-	-fx-border-width: 3;
+	-fx-border-width: 1px;
 	-fx-border-style: solid;
 }
 
@@ -13,4 +20,12 @@ Button {
     -fx-text-fill: black;
     -fx-label-padding: 4px;
     -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );
+}
+
+.section-title {
+	-fx-alignment: top-left;
+}
+
+.bottom-align {
+	-fx-alignment: bottom-right;
 }

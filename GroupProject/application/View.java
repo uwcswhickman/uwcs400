@@ -2,6 +2,8 @@ package application;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -9,14 +11,17 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class View extends Application {
 	
 	// to make grid height and width all relative to a single number input so we can easily update it with one number
-	private static final double smallSectionRatio = .5; // for columns, the middle is 1/2 the size of left and right; for rows, the top and bottom are 1/2 the size of the middle row
+	private static final double smallSectionRatio = .3; // for columns, the middle is 1/2 the size of left and right; for rows, the top and bottom are 1/2 the size of the middle row
 	private static final double heightToWidthRatio = .4;  // height is 40% of the width
 	
 	private static final double baseWidth = 500;  // this is the only number we need to update to change the overall scale of the grid
@@ -29,6 +34,8 @@ public class View extends Application {
 	private static final double centerWidth = baseWidth * smallSectionRatio;  // center width is relative to right and left width
 	private static final double leftWidth = baseWidth;			// left width is default
 	
+	private static final double minButtonSize = 100;
+	
 	public static void main(String[] args) {
 		launch(args);
 	}
@@ -39,13 +46,16 @@ public class View extends Application {
 		try
 		{
 			GridPane parent = new GridPane();
-			VBox foodOptionsCol = GetFoodOptionsColumn();
-			VBox addRemItemsCol = GetAddRemoveItemsColumn();
-			VBox mealCol = GetMealColumn();
 			
-			parent.addColumn(0, foodOptionsCol);
-			parent.addColumn(1, addRemItemsCol);
-			parent.addColumn(2, mealCol);
+			parent.add(GetOptionsLoadSaveBox(), 0, 0);
+			parent.add(GetOptionsListBox(), 0, 1);
+			parent.add(GetOptionsListButtons(), 0, 2);
+			parent.add(new VBox(), 1, 0); // dummy just to make it make sense for now. can remove later
+			parent.add(GetAddRemoveButtons(), 1, 1);
+			parent.add(new VBox(), 1, 2); // dummy just to make it make sense for now. can remove later
+			parent.add(GetMealLabel(), 2, 0);
+			parent.add(GetMealList(), 2, 1);
+			parent.add(GetMealAnalyzeButton(), 2, 2);
 			
 			Scene scene = new Scene(parent);
 			
@@ -61,27 +71,22 @@ public class View extends Application {
 		}
 		
 	}
-	// Left column
-	private VBox GetFoodOptionsColumn()
-	{
-		VBox rtnBox = new VBox();
-		HBox top = GetOptionsLoadSaveBox();
-		HBox middle = GetOptionsListBox();
-		HBox bottom = GetOptionsListButtons();
-		rtnBox.getChildren().addAll(top, middle, bottom);
-		return rtnBox;
-	}
 	
 	// Top Left
 	private HBox GetOptionsLoadSaveBox()
 	{
 		HBox rtnBox = new HBox();
+		rtnBox.setAlignment(Pos.CENTER);
+		rtnBox.setPadding(new Insets(5, 5, 5, 5));
 		Label lblOptions = new Label("Food Options");
-		Button btnLoadList = new Button("Load List");
-		Button btnSaveList = new Button("Save List");
+		lblOptions.setFont(Font.font("Ariel", 18));
+		Button btnLoadList = newButton("Load List");
+		Button btnSaveList = newButton("Save List");
 		rtnBox.setMinHeight(topHeight);
-		rtnBox.setMinWidth(rightWidth);
-		rtnBox.getChildren().addAll(lblOptions, btnLoadList, btnSaveList);
+		rtnBox.setMinWidth(leftWidth);
+		final Pane spacer = new Pane();
+	    HBox.setHgrow(spacer, Priority.ALWAYS);
+		rtnBox.getChildren().addAll(lblOptions, spacer, btnLoadList, btnSaveList);
 		return rtnBox;
 	}
 	
@@ -91,7 +96,7 @@ public class View extends Application {
 		HBox rtnBox = new HBox();
 		// add scrollbox
 		rtnBox.setMinHeight(middleHeight);
-		rtnBox.setMinWidth(rightWidth);
+		rtnBox.setMinWidth(leftWidth);
 		return rtnBox;
 	}
 	
@@ -100,47 +105,69 @@ public class View extends Application {
 	{
 		HBox rtnBox = new HBox();
 		rtnBox.setMinHeight(bottomHeight);
+		rtnBox.setMinWidth(leftWidth);
+		rtnBox.setAlignment(Pos.TOP_CENTER);
+		Button btnNewItem = newButton("Add New Item");
+		Button btnFilters = newButton("Filters");
+		Button btnClearFilters = newButton("Clear Filters");
+		final Pane spacer = new Pane();
+	    HBox.setHgrow(spacer, Priority.ALWAYS);
+		rtnBox.getChildren().addAll(spacer, btnNewItem, btnFilters, btnClearFilters);
+		return rtnBox;
+	}
+	
+	// Middle Center
+	private VBox GetAddRemoveButtons()
+	{
+		VBox rtnBox = new VBox();
+		rtnBox.setMinHeight(middleHeight);
+		rtnBox.setMinWidth(centerWidth);
+		rtnBox.setAlignment(Pos.CENTER);
+		double preferredWidth = centerWidth * .8;
+		Button btnAddItem = newButton("Add to Meal");
+		Button btnRemoveItem = newButton("Remove from Meal");
+		btnAddItem.setMinWidth(preferredWidth);
+		btnRemoveItem.setMinWidth(preferredWidth);
+		rtnBox.getChildren().addAll(btnAddItem, btnRemoveItem);
+		return rtnBox;
+	}
+	
+	private HBox GetMealLabel()
+	{
+		HBox rtnBox = new HBox();
+		rtnBox.setMinHeight(topHeight);
 		rtnBox.setMinWidth(rightWidth);
-		Button btnNewItem = new Button("Add New Item");
-		Button btnFilters = new Button("Filters");
-		Button btnClearFilters = new Button("Clear Filters");
-		rtnBox.getChildren().addAll(btnNewItem, btnFilters, btnClearFilters);
+		rtnBox.setAlignment(Pos.CENTER_LEFT);
+		Label lblMeal = new Label("Meal List");
+		lblMeal.setFont(Font.font("Ariel", 18));
+		rtnBox.getChildren().add(lblMeal);
 		return rtnBox;
 	}
 	
-	private VBox GetAddRemoveItemsColumn()
+	private HBox GetMealList()
 	{
-		VBox rtnBox = new VBox();
-		Label top = new Label("Top");
-		top.setMinHeight(topHeight);
-		top.setMinWidth(centerWidth);
-		rtnBox.getChildren().add(top);
-		Label middle = new Label("Middle");
-		middle.setMinHeight(middleHeight);
-		middle.setMinWidth(centerWidth);
-		rtnBox.getChildren().add(middle);
-		Label bottom = new Label("Bottom");
-		bottom.setMinHeight(bottomHeight);
-		bottom.setMinWidth(centerWidth);
-		rtnBox.getChildren().add(bottom);
+		HBox rtnBox = new HBox();
+		rtnBox.setMinHeight(middleHeight);
+		rtnBox.setMinWidth(rightWidth);
 		return rtnBox;
 	}
 	
-	private VBox GetMealColumn()
+	private HBox GetMealAnalyzeButton()
 	{
-		VBox rtnBox = new VBox();
-		Label top = new Label("Top");
-		top.setMinHeight(topHeight);
-		top.setMinWidth(leftWidth);
-		rtnBox.getChildren().add(top);
-		Label middle = new Label("Middle");
-		middle.setMinHeight(middleHeight);
-		middle.setMinWidth(leftWidth);
-		rtnBox.getChildren().add(middle);
-		Label bottom = new Label("Bottom");
-		bottom.setMinHeight(bottomHeight);
-		bottom.setMinWidth(leftWidth);
-		rtnBox.getChildren().add(bottom);
+		HBox rtnBox = new HBox();
+		rtnBox.setMinHeight(bottomHeight);
+		rtnBox.setMinWidth(rightWidth);
+		Button btnAnalyze = newButton("Analyze");
+		final Pane spacer = new Pane();
+	    HBox.setHgrow(spacer, Priority.ALWAYS);
+		rtnBox.getChildren().addAll(spacer, btnAnalyze);
 		return rtnBox;
+	}
+	
+	private Button newButton(String btnCaption)
+	{
+		Button rtnButton = new Button(btnCaption);
+		rtnButton.setMinWidth(minButtonSize);
+		return rtnButton;
 	}
 }
