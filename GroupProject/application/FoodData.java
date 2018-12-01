@@ -1,3 +1,4 @@
+package application;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -417,8 +418,9 @@ public class FoodData implements FoodDataADT<FoodItem> {
     {
     	System.out.println("Items passing the following rules:");
     	List<String> rules = new LinkedList<String>();
-    	rules.add("calories >= 50");
     	rules.add("calories <= 50");
+    	rules.add("calories >= 50");
+    	
     	rules.add("calories == 50");
     	
     	for (String nxt: rules)
@@ -426,11 +428,12 @@ public class FoodData implements FoodDataADT<FoodItem> {
     		System.out.println(nxt);
     	}
     	List<FoodItem> filteredData = data.filterByNutrients(rules);
-    	
+    	System.out.println("Found " + filteredData.size() + " items");
     	for (FoodItem nxt: filteredData)
     	{
     		System.out.println(printHelper(nxt, "calories"));
     	}
+    	System.out.println(data.indexes.get("calories").toString());
     	System.out.println();
     }
     

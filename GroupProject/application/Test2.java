@@ -29,6 +29,21 @@ import javafx.scene.text.Font;
 
 public class Test2 extends Application{
 	final int SIZE = 60;
+	
+	// to make grid height and width all relative to a single number input so we can easily update it with one number
+	private static final double smallSectionRatio = .5; // for columns, the middle is 1/2 the size of left and right; for rows, the top and bottom are 1/2 the size of the middle row
+	private static final double heightToWidthRatio = .4;  // height is 40% of the width
+	
+	private static final double baseWidth = 500;  // this is the only number we need to update to change the overall scale of the grid
+	private static final double baseHeight = baseWidth * heightToWidthRatio;  // height is 40% of the width
+	
+	private static final double topHeight = baseHeight * smallSectionRatio;	// top height is relative to middle height
+	private static final double middleHeight = baseHeight;		// middle is the default
+	private static final double bottomHeight = baseHeight * smallSectionRatio; // bottom height is relative to middle height
+	private static final double rightWidth = baseWidth;			// right width is default
+	private static final double centerWidth = baseWidth * smallSectionRatio;  // center width is relative to right and left width
+	private static final double leftWidth = baseWidth;			// left width is default
+	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		
