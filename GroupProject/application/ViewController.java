@@ -38,6 +38,50 @@ public class ViewController {
 		// instantiate other fields with empty objects
 	}
 	
+	public List<String> dummyOptions()
+	{
+		List<String> rtnList = new LinkedList<String>();
+		rtnList.add("Tinkyada_BrownRice14OzPasta");
+		rtnList.add("AlFresco_ChickenSausageBurgersHotItalianStyle");
+		rtnList.add("EccePanis_EuropeanBaguette");
+		rtnList.add("Tostitos_TortillaChipsThickHeartyRounds");
+		rtnList.add("Keebler_SimplyMadeCookiesButter");
+		rtnList.add("Swanson_ChickenBreastWhitePremiumChunkinWater");
+		rtnList.add("Arnold_BreadPremiumWhiteEnriched");
+		rtnList.add("SamsChoice_AllNaturalChocolateIceCream");
+		rtnList.add("GreatValue_FudgeDoubleFilledTwistShoutSandwichCookies");
+		rtnList.add("AndrewEverett_ShreddedCheeseMozzarella");
+		rtnList.add("Zoglos_HotDogsSavoryMeatlessFranks");
+		rtnList.add("Kraft_CheeseItalianThreeCheese");
+		rtnList.add("MarketDay_MiniOmeletswithReducedFatCheese");
+		rtnList.add("MedicalWeightLossClinic_FruitDrinkMixedBerry");
+		rtnList.add("LowesFoods_ShreddedCheeseMildCheddar");
+		rtnList.add("Herrs_PotatoChipsFiremansBBQChicken");
+		rtnList.add("Reese_TroutGoldenSmokedFillets375Oz");
+		rtnList.add("RaisinBran_RaisinBran");
+		rtnList.add("MorningFreshFarms_FancyShreddedNaturalCheeseSharpCheddar");
+		rtnList.add("AmericasChoice_RipePittedLargeOlives");
+		rtnList.add("SafewayKitchens_ChickenKiev");
+		rtnList.add("Goya_EmpanadasBeef");
+		rtnList.add("HurricaneBay_SouthwesternMarinade");
+		rtnList.add("PopcornIndiana_AgedWhiteCheddarPopcorn");
+		rtnList.add("MidwestCountryFare_TomatoesWholePeeled");
+		rtnList.add("HeritageFarm_Bologna");
+		rtnList.add("HillCountryFare_HoneySweetCornBread");
+		rtnList.add("Giant_CheddarCheeseTwiceBakedPotatoes");
+		rtnList.add("Spartan_ShreddedMozzarellaCheese");
+		rtnList.add("Detour_EnergyBarChocolatePeanutButter");
+		rtnList.add("JuicyJuice_100JuiceApple");
+		rtnList.add("Welchs_FrozenSmoothieKitBlueberryCherryBlend");
+		rtnList.add("FairOaksFarms_MilkFatFree");
+		rtnList.add("GhirardelliChocolate_DarkMeltingWafers");
+		rtnList.add("BumbleBee_RedSalmonWildAlaskaSockeye");
+		rtnList.add("GoldEmblem_LuxuryWafers");
+		rtnList.add("Borden_PunchPineappleBanana");
+		rtnList.add("Hormel_FranksWranglersCoarseGroundCheeseSmoked");
+		return rtnList;
+	}
+	
 	// File I/O
 	public String TrySave(String savePath) throws FileNotFoundException
 	{

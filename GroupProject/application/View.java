@@ -8,6 +8,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -34,7 +35,9 @@ public class View extends Application {
 	private static final double centerWidth = baseWidth * smallSectionRatio;  // center width is relative to right and left width
 	private static final double leftWidth = baseWidth;			// left width is default
 	
-	private static final double minButtonSize = 100;
+	private static final double minButtonSize = 100;	// basic minimum so that buttons don't look weirdly different all over the place
+	
+	private ViewController controller;
 	
 	public static void main(String[] args) {
 		launch(args);
@@ -45,24 +48,37 @@ public class View extends Application {
 	
 		try
 		{
+			controller = new ViewController();
 			GridPane parent = new GridPane();
 			
+			// top left - options label + load/save list
 			parent.add(GetOptionsLoadSaveBox(), 0, 0);
+			// middle left - scrollable options list
 			parent.add(GetOptionsListBox(), 0, 1);
+			// bottom left - filters etc.
 			parent.add(GetOptionsListButtons(), 0, 2);
-			parent.add(new VBox(), 1, 0); // dummy just to make it make sense for now. can remove later
+			// top center - dummy just to make it make sense for now. can remove later
+			parent.add(new VBox(), 1, 0); 
+			// middle center - Add/remove items from meal list
 			parent.add(GetAddRemoveButtons(), 1, 1);
-			parent.add(new VBox(), 1, 2); // dummy just to make it make sense for now. can remove later
+			// bottm center - dummy just to make it make sense for now. can remove later
+			parent.add(new VBox(), 1, 2); 
+			// top right - Meal list lable
 			parent.add(GetMealLabel(), 2, 0);
+			// middle right - scrollable meal list
 			parent.add(GetMealList(), 2, 1);
+			// bottom right - analyze button
 			parent.add(GetMealAnalyzeButton(), 2, 2);
 			
+			// make main scene
 			Scene scene = new Scene(parent);
 			
+			// add common styles
 			scene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
 			
+			// set title and show
 			primaryStage.setTitle("Meal Analysis App");
-			primaryStage.setScene(scene);;	
+			primaryStage.setScene(scene);
 			primaryStage.show();
 		}
 		catch (Exception e)
@@ -91,12 +107,15 @@ public class View extends Application {
 	}
 	
 	// Middle left
-	private HBox GetOptionsListBox()
+	private VBox GetOptionsListBox()
 	{
-		HBox rtnBox = new HBox();
-		// add scrollbox
+		VBox rtnBox = new VBox();
+		ListView<String> foodList = new ListView<String>();
+		foodList.getItems().addAll(controller.dummyOptions());
 		rtnBox.setMinHeight(middleHeight);
 		rtnBox.setMinWidth(leftWidth);
+		rtnBox.getChildren().add(foodList);
+		rtnBox.setFillWidth(true);
 		return rtnBox;
 	}
 	
