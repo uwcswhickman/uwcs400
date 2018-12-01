@@ -142,11 +142,10 @@ public class View extends Application {
 		rtnBox.setMinHeight(middleHeight);
 		rtnBox.setMinWidth(centerWidth);
 		rtnBox.setAlignment(Pos.CENTER);
-		double preferredWidth = centerWidth * .8;
 		Button btnAddItem = newButton("Add to Meal");
 		Button btnRemoveItem = newButton("Remove from Meal");
-		btnAddItem.setMinWidth(preferredWidth);
-		btnRemoveItem.setMinWidth(preferredWidth);
+		btnAddItem.setMaxWidth(Double.MAX_VALUE);
+		btnRemoveItem.setMaxWidth(Double.MAX_VALUE);
 		rtnBox.getChildren().addAll(btnAddItem, btnRemoveItem);
 		return rtnBox;
 	}
@@ -163,11 +162,14 @@ public class View extends Application {
 		return rtnBox;
 	}
 	
-	private HBox GetMealList()
+	private VBox GetMealList()
 	{
-		HBox rtnBox = new HBox();
+		VBox rtnBox = new VBox();
+		ListView<String> mealList = new ListView<String>();
 		rtnBox.setMinHeight(middleHeight);
 		rtnBox.setMinWidth(rightWidth);
+		rtnBox.getChildren().add(mealList);
+		rtnBox.setFillWidth(true);
 		return rtnBox;
 	}
 	

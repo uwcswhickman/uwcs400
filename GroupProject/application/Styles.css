@@ -1,19 +1,16 @@
+GridPane {
+	-fx-padding: 5px;
+}
 HBox {
-	-fx-padding: 10px;
-	-fx-border-color: black; 
-	-fx-border-width: 1px;
-	-fx-border-style: solid;
+	-fx-padding: 5px;
 }
 
 VBox {
-	-fx-padding: 10px;
-	-fx-border-color: black;
-	-fx-border-width: 1px;
-	-fx-border-style: solid;
+	-fx-padding: 5px;
 }
 
 Button {
-	-fx-padding: 4px;
+	-fx-padding: 6px;
     -fx-border-insets: 4px;
     -fx-background-insets: 4px;
     -fx-background-radius: 5;
