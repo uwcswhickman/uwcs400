@@ -1,3 +1,14 @@
+/**
+ * @author - Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
+ * Styling tips from combination of various sources including
+ *   - https://docs.oracle.com/javafx/2/layout/size_align.htm
+ *   - http://fxexperience.com/2011/12/styling-fx-buttons-with-css/
+ *   - https://docs.oracle.com/javafx/2/api/javafx/scene/doc-files/cssref.html
+ *   - https://stackoverflow.com/questions/43508511/hover-and-pressed-in-javafx
+ *   - https://stackoverflow.com/questions/39214586/how-to-align-a-button-right-in-javafx
+ *   - https://stackoverflow.com/questions/25336796/tooltip-background-with-javafx-css
+ */
+
 GridPane {
 	-fx-padding: 40px;
 	-fx-background-color: rgb(240, 240, 240);

@@ -19,7 +19,7 @@ import javafx.scene.control.ListView;
  *   - https://docs.oracle.com/javafx/2/api/javafx/scene/doc-files/cssref.html
  *   - https://stackoverflow.com/questions/43508511/hover-and-pressed-in-javafx
  *   - 
- * @author whickman
+ * @author Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
  *
  */
 public class ViewController {

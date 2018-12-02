@@ -17,7 +17,7 @@ import java.util.TreeMap;
  * This class represents the backend for managing all 
  * the operations associated with FoodItems
  * 
- * @author sapan (sapan@cs.wisc.edu)
+ * @author sapan (sapan@cs.wisc.edu), Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
  */
 public class FoodData implements FoodDataADT<FoodItem> {
     

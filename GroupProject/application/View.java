@@ -22,7 +22,7 @@ import javafx.stage.Stage;
 
 /**
  * Resources
- * Styling from combination of various sources including
+ * Styling tips from combination of various sources including
  *   - https://docs.oracle.com/javafx/2/layout/size_align.htm
  *   - http://fxexperience.com/2011/12/styling-fx-buttons-with-css/
  *   - https://docs.oracle.com/javafx/2/api/javafx/scene/doc-files/cssref.html
@@ -30,13 +30,13 @@ import javafx.stage.Stage;
  *   - https://stackoverflow.com/questions/39214586/how-to-align-a-button-right-in-javafx
  *   - https://stackoverflow.com/questions/25336796/tooltip-background-with-javafx-css
  *   
- * @author whickman
+ * @author Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
  *
  */
 public class View extends Application {
 	
 	// to make grid height and width all relative to a single number input so we can easily update it with one number
-	private static final double smallSectionRatio = .3; // for columns, the middle is 1/2 the size of left and right; for rows, the top and bottom are 1/2 the size of the middle row
+	private static final double smallSectionRatio = .3; // for columns, the middle is 30% the size of left and right; for rows, the top and bottom are 30% the size of the middle row
 	private static final double heightToWidthRatio = .4;  // height is 40% of the width
 	
 	private static final double baseWidth = 550;  // this is the only number we need to update to change the overall scale of the grid
