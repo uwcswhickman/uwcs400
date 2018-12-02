@@ -76,6 +76,17 @@ Button:pressed {
     -fx-scale-x: 0.98;
 }
 
+.tooltip {
+    -fx-background: rgba(240,240,240);
+    -fx-text-fill: rgb(57, 59, 61);
+    -fx-background-color: rgba(240,240,240);
+    -fx-background-radius: 3px;
+    -fx-background-insets: 0;
+    -fx-padding: 0.667em 0.75em 0.667em 0.75em; /* 10px */
+    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.5) , 10, 0.0 , 0 , 3 );
+    -fx-font-size: 0.85em;
+}
+
 .add-button:hover {
 	-fx-background-color: #006E51; /* Lush meadow - https://www.w3schools.com/colors/colors_trends.asp */
     -fx-text-fill: rgb(240, 240, 240);

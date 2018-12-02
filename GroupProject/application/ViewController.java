@@ -1,5 +1,6 @@
 package application;
 import java.io.FileNotFoundException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -94,6 +95,7 @@ public class ViewController {
 		rtnList.add("GoldEmblem_LuxuryWafers");
 		rtnList.add("Borden_PunchPineappleBanana");
 		rtnList.add("Hormel_FranksWranglersCoarseGroundCheeseSmoked");
+		Collections.sort(rtnList);
 		return rtnList;
 	}
 	
@@ -117,7 +119,7 @@ public class ViewController {
 	public ListView<String> GetMeal()
 	{
 		ListView<String> rtnLV = new ListView<String>();
-		rtnLV.getItems().addAll("Giant_CheddarCheeseTwiceBakedPotatoes", "Spartan_ShreddedMozzarellaCheese", "Detour_EnergyBarChocolatePeanutButter");
+		
 		return rtnLV;
 	}
 	

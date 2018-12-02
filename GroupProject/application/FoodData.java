@@ -54,6 +54,7 @@ public class FoodData implements FoodDataADT<FoodItem> {
         {
         	this.indexes.put(nxt.toString(), new BPTree<Double, FoodItem>(3));
         }
+        this.loadFoodItems("C:\\WillSource\\CS400\\uwcs400\\GroupProject\\foodItems.csv");
     }
     
     
