@@ -6,6 +6,21 @@ import java.util.List;
 import java.util.Random;
 import java.util.TreeMap;
 
+import javafx.scene.control.ListView;
+
+/**
+ * 
+ * Resources
+ *   Observable list implementation learned from https://rterp.wordpress.com/2015/09/21/binding-a-list-of-strings-to-a-javafx-listview
+ *   Styling from combination of various sources including
+ *   - https://docs.oracle.com/javafx/2/layout/size_align.htm
+ *   - http://fxexperience.com/2011/12/styling-fx-buttons-with-css/
+ *   - https://docs.oracle.com/javafx/2/api/javafx/scene/doc-files/cssref.html
+ *   - https://stackoverflow.com/questions/43508511/hover-and-pressed-in-javafx
+ *   - 
+ * @author whickman
+ *
+ */
 public class ViewController {
 	
 	public enum Compare
@@ -99,9 +114,11 @@ public class ViewController {
 	}
 	
 	// Meal methods
-	public List<FoodItem> GetMeal()
+	public ListView<String> GetMeal()
 	{
-		return this.meal;
+		ListView<String> rtnLV = new ListView<String>();
+		rtnLV.getItems().addAll("Giant_CheddarCheeseTwiceBakedPotatoes", "Spartan_ShreddedMozzarellaCheese", "Detour_EnergyBarChocolatePeanutButter");
+		return rtnLV;
 	}
 	
 	public void AddToMeal(FoodItem toAdd)
@@ -136,13 +153,19 @@ public class ViewController {
 		// clear all rules
 	}
 	
-	
-	
 	// Options methods
-	public List<FoodItem> GetFoodOptions(String nameContains, List<String> rules)
+	public ListView<String> GetFoodOptions()
+	{
+		ListView<String> rtnLV = new ListView<String>();
+		rtnLV.getItems().addAll(this.dummyOptions());
+		return rtnLV;
+//		GetFoodOptions("", null); // for real implementation, we should run regular method with no inputs, which will give the full list 
+	}
+	
+	public ListView<String> GetFoodOptions(String nameContains, List<String> rules)
 	{
 		// get filtered by name and get filtered by nutrient, then probably take the smaller one and use use retainAll to find intersection to return
-		return new LinkedList<FoodItem>();
+		return new ListView<String>();
 	}
 	
 	
