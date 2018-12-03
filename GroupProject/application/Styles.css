@@ -22,11 +22,45 @@ VBox {
 }
 
 Label {
-	-fx-text-fill: rgb(57, 59, 61);
-	-fx-font-weight: bold;
+	-fx-padding: 3px, 3px, 3px, 0px;
+    -fx-border-insets: 4px, 4px, 4px, 0px;
+    -fx-background-insets: 4px, 4px, 4px, 0px;
+    -fx-text-fill: black;
+    -fx-label-padding: 4px, 4px, 4px, 0px;
+    -fx-background-color: transparent;
+    -fx-text-fill: rgb(57, 59, 61);
+    -fx-font-weight: bold;
 }
 
 Button {
+	-fx-padding: 3px;
+    -fx-border-insets: 4px;
+    -fx-background-insets: 4px;
+    -fx-text-fill: black;
+    -fx-label-padding: 4px;
+    -fx-background-color: transparent;
+    -fx-text-fill: rgb(57, 59, 61);
+    -fx-font-weight: bold;
+    -fx-border-color: rgb(57, 59, 61);
+    -fx-border-radius: 2;
+    -fx-border-width:1px;
+}
+
+TextField {
+	-fx-padding: 3px;
+    -fx-border-insets: 4px;
+    -fx-background-insets: 4px;
+    -fx-text-fill: black;
+    -fx-label-padding: 4px;
+    -fx-background-color: rgb(255, 255, 255);
+    -fx-text-fill: rgb(57, 59, 61);
+    -fx-font-weight: bold;
+    -fx-border-color: rgb(57, 59, 61);
+    -fx-border-radius: 2;
+    -fx-border-width:1px;
+}
+
+ComboBox {
 	-fx-padding: 3px;
     -fx-border-insets: 4px;
     -fx-background-insets: 4px;
@@ -67,11 +101,11 @@ ListView {
     -fx-font-weight: bold;
 }
 
-.meal-list .list-cell:even {
+.no-op-list .list-cell:even {
 	-fx-background-color: rgb(240, 240, 240);
 	-fx-text-fill: rgb(57, 59, 61);
 }
-.meal-list .list-cell:odd {
+.no-op-list .list-cell:odd {
 	-fx-background-color: rgb(230, 230, 230);
 	-fx-text-fill: rgb(57, 59, 61);
 }

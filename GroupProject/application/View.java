@@ -7,8 +7,10 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -18,10 +20,13 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
  * Resources
+ * Pop-up implementation from here: https://stackoverflow.com/questions/22166610/how-to-create-a-popup-windows-in-javafx
  * Styling tips from combination of various sources including
  *   - https://docs.oracle.com/javafx/2/layout/size_align.htm
  *   - http://fxexperience.com/2011/12/styling-fx-buttons-with-css/
@@ -52,6 +57,7 @@ public class View extends Application {
 	private static final double minButtonSize = 100;	// basic minimum so that buttons don't look weirdly different all over the place
 	
 	private ViewController controller;
+	private Stage primaryStage;
 	
 	public static void main(String[] args) {
 		launch(args);
@@ -62,7 +68,8 @@ public class View extends Application {
 	
 		try
 		{
-			controller = new ViewController();
+			this.controller = new ViewController();
+			this.primaryStage = primaryStage;
 			GridPane parent = new GridPane();
 			
 			// top left - options label + load/save list
@@ -112,6 +119,16 @@ public class View extends Application {
 		lblOptions.setFont(Font.font("Ariel", 18));
 		Button btnLoadList = newButton("Load List");
 		btnLoadList.setTooltip(new Tooltip("Load new options list from a file"));
+		btnLoadList.setOnAction(
+				new EventHandler<ActionEvent>()
+				{
+					@Override
+					public void handle(ActionEvent event)
+					{
+						Stage dialog = popupOutline();
+						dialog.show();
+					}
+				});
 		Button btnSaveList = newButton("Save List");
 		btnSaveList.setTooltip(new Tooltip("Save current options list to a file in alphabetical order"));
 		rtnBox.setMinHeight(topHeight);
@@ -146,10 +163,22 @@ public class View extends Application {
 		rtnBox.setMinHeight(bottomHeight);
 		rtnBox.setMinWidth(leftWidth);
 		rtnBox.setAlignment(Pos.TOP_CENTER);
+		
 		Button btnNewItem = newButton("Add New Item");
 		btnNewItem.setTooltip(new Tooltip("Add a custom food item to the options list"));
+		
 		Button btnFilters = newButton("Filters");
 		btnFilters.setTooltip(new Tooltip("Apply filters to narrow down the options list"));
+		btnFilters.setOnAction(
+				new EventHandler<ActionEvent>()
+				{
+					@Override
+					public void handle(ActionEvent event)
+					{
+						Stage dialog = GetFilterPopUp();
+						dialog.show();
+					}
+				});
 		Button btnClearFilters = newButton("Clear Filters");
 		btnClearFilters.setTooltip(new Tooltip("Remove any filters currently applied to the options list"));
 		Pane spacer = new Pane();
@@ -193,7 +222,7 @@ public class View extends Application {
 	{
 		VBox rtnBox = new VBox();
 		ListView<String> mealList = controller.GetMeal();
-		mealList.getStyleClass().add("meal-list");
+		mealList.getStyleClass().add("no-op-list");
 		rtnBox.setMinHeight(middleHeight);
 		rtnBox.setMinWidth(rightWidth);
 		rtnBox.getChildren().add(mealList);
@@ -219,5 +248,106 @@ public class View extends Application {
 		Button rtnButton = new Button(btnCaption);
 		rtnButton.setMinWidth(minButtonSize);
 		return rtnButton;
+	}
+	
+	private Stage GetFilterPopUp()
+	{
+		VBox root = new VBox();
+		
+		// attributes label
+		HBox firstRow = new HBox();
+		Label attLabel = new Label("Attribute filter");
+		firstRow.getChildren().add(attLabel);
+		root.getChildren().add(firstRow);
+		
+		// attribute filter row
+		HBox attFilterRow = new HBox();
+		ComboBox<String> attSelector = new ComboBox<String>();
+		// add all attributes from the Nutrient enum: calories, fat, carbohydrate, fiber, protein;
+		attSelector.getItems().addAll(controller.GetAllNutrients());
+		attSelector.setValue(controller.GetDefaultNutrient()); // first entry in the list
+		
+		ComboBox<String> comparatorSelector = new ComboBox<String>();
+		// add all comparators from the Comparators const list: <=, ==, >=
+		comparatorSelector.getItems().addAll(controller.GetAllComparators());
+		comparatorSelector.setValue(controller.GetDefaultComparator()); // first entry in the list
+		
+		TextField val = new TextField();
+		val.setMaxWidth(45);
+		val.setMaxHeight(45);
+		Pane spacer = new Pane();
+		HBox.setHgrow(spacer, Priority.ALWAYS);
+		Button btnAdd = new Button("Add filter");
+		
+		attFilterRow.getChildren().addAll(attSelector, comparatorSelector, val, spacer, btnAdd);
+		root.getChildren().add(attFilterRow);
+		
+		// name filter label row
+		HBox nameFilterLabelRow = new HBox();
+		Label nameContains = new Label("Name contains");
+		nameFilterLabelRow.getChildren().add(nameContains);
+		root.getChildren().add(nameFilterLabelRow);
+		
+		// name filter row
+		HBox nameFilterRow = new HBox();
+		TextField name = new TextField();
+		name.setMaxHeight(45);
+		Button btnAddNameFilter = new Button("Add filter");
+		HBox.setHgrow(name, Priority.ALWAYS);
+		nameFilterRow.getChildren().addAll(name, btnAddNameFilter);
+		root.getChildren().add(nameFilterRow);
+		
+		// selected filter summary label
+		HBox summaryLabelRow = new HBox();
+		Label summaryLabel = new Label("Selected filters");
+		summaryLabelRow.getChildren().add(summaryLabel);
+		root.getChildren().add(summaryLabelRow);
+		
+		// selected filters summary list
+		VBox summaryListContainer = new VBox();
+		ListView<String> summary = controller.GetAllFilters();
+		summary.getStyleClass().add("no-op-list"); // don't allow row selection or highlighting, since we're not allowing manipulation on a row level
+		summary.setPrefHeight(100);
+		summaryListContainer.getChildren().add(summary);
+		summaryListContainer.setFillWidth(true);
+		root.getChildren().add(summaryListContainer);
+		
+		Scene filterScene = new Scene(root);
+		filterScene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
+		Stage filters = new Stage();
+		filters.initModality(Modality.APPLICATION_MODAL);
+		filters.initOwner(this.primaryStage);
+		filters.setTitle("Filters");
+		filters.setScene(filterScene);
+		return filters;
+	}
+	
+	/**
+	 * Outline for a pop-up. See the btnFilters declaration in GetAddRemoveItems for 
+	 * an example of how to use this tag to launch your pop-up
+	 * @return
+	 */
+	private Stage popupOutline()
+	{
+		VBox root = new VBox();
+		
+		HBox firstRow = new HBox();
+		Label firstRowLabel = new Label("First row");
+		TextField firstRowField = new TextField();
+		firstRowField.setMaxHeight(45); // this makes it the same height as buttons and labels, so it looks nice
+		firstRow.getChildren().addAll(firstRowLabel, firstRowField);
+		
+		root.getChildren().add(firstRow);
+		
+		Scene scene = new Scene(root);
+		// add standard styling to make it look consistent
+		scene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
+		
+		Stage rtnStage = new Stage();
+		rtnStage.initModality(Modality.APPLICATION_MODAL);
+		rtnStage.initOwner(this.primaryStage);
+		rtnStage.setTitle("Pop-up Title");
+		rtnStage.setScene(scene);
+		return rtnStage;
 	}
 }

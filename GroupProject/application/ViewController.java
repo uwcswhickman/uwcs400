@@ -24,22 +24,6 @@ import javafx.scene.control.ListView;
  */
 public class ViewController {
 	
-	public enum Compare
-	{
-		LessThan,
-		EqualTo,
-		GreaterThan
-	}
-	
-	private enum Nutrient
-	{
-		calories,
-		fat,
-		carbohydrate,
-		fiber,
-		protein;
-	}
-	
 	private FoodData sessionData;
 	private List<FoodItem> meal;
 	private List<String> rules;
@@ -133,19 +117,51 @@ public class ViewController {
 		
 	}
 	
-	public TreeMap<Nutrient, Double> GetMealAnalysis()
+	public TreeMap<Constants.Nutrient, Double> GetMealAnalysis()
 	{
 		// add everything up from this.meal and return map
-		return new TreeMap<Nutrient, Double>();
+		return new TreeMap<Constants.Nutrient, Double>();
 	}
 
 	// filter methods
+	public List<String> GetAllNutrients()
+	{
+		LinkedList<String> rtnList = new LinkedList<String>();
+		for (Constants.Nutrient nxt: Constants.Nutrient.values())
+		{
+			rtnList.add(nxt.toString());
+		}
+		return rtnList;
+	}
+	
+	public String GetDefaultNutrient()
+	{
+		return Constants.Nutrient.values()[0].toString();
+	}
+	
+	public List<String> GetAllComparators()
+	{
+		return Constants.Comparators;
+	}
+	
+	public String GetDefaultComparator()
+	{
+		return Constants.Comparators.get(0);
+	}
+	
+	public ListView<String> GetAllFilters()
+	{
+		ListView<String> rtnLV = new ListView<String>();
+		
+		return rtnLV;
+	}
+	
 	public void AddNameFilter(String nameContains)
 	{
 		
 	}
 	
-	public void AddRule(Nutrient attribute, Compare compareSymbol, String val)
+	public void AddRule(Constants.Nutrient attribute, String compareSymbol, String val)
 	{
 		// toString the enums, parse the value to make sure it's a double, and make a rule with it and add to this.rules
 	}

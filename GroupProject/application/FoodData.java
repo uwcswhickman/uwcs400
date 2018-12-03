@@ -21,11 +21,6 @@ import java.util.TreeMap;
  */
 public class FoodData implements FoodDataADT<FoodItem> {
     
-	// used for parsing and organization of food data
-	private enum Nutrient
-	{
-		calories,fat,carbohydrate,fiber,protein;
-	}
     // List of all the food items.
     private List<FoodItem> foodItemList;
     
@@ -50,7 +45,7 @@ public class FoodData implements FoodDataADT<FoodItem> {
         this.indexes = new HashMap<String, BPTree<Double, FoodItem>>();
         this.nameIndex = new HashMap<String, HashSet<FoodItem>>();
         this.sortedByName = new TreeMap<String, FoodItem>();
-        for (Nutrient nxt: Nutrient.values())
+        for (Constants.Nutrient nxt: Constants.Nutrient.values())
         {
         	this.indexes.put(nxt.toString(), new BPTree<Double, FoodItem>(3));
         }
@@ -144,7 +139,7 @@ public class FoodData implements FoodDataADT<FoodItem> {
     				try
     				{
     					String nutrient = pieces[i].toLowerCase();
-    					Nutrient.valueOf(nutrient);  // throws IllegalArgumentException if not in the list
+    					Constants.Nutrient.valueOf(nutrient);  // throws IllegalArgumentException if not in the list
         				double value = Double.parseDouble(pieces[++i]);  // throws NumberFormatException if not parse-able. 
         				nxtItm.addNutrient(nutrient, value);
     				}
@@ -376,7 +371,7 @@ public class FoodData implements FoodDataADT<FoodItem> {
 		sb.append(item.getName());
 		sb.append(",");
 		HashMap<String, Double> nutrients = item.getNutrients();
-		Nutrient[] nutrientList = Nutrient.values();
+		Constants.Nutrient[] nutrientList = Constants.Nutrient.values();
 		NumberFormat formatter = new DecimalFormat("#0");
 		for (int i = 0; i < nutrientList.length; i++)
 		{
