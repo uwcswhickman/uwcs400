@@ -30,8 +30,6 @@ import javafx.scene.control.ListView;
  */
 public class ViewController {
 	
-	
-	
 	// model
 	private FoodData sessionData;
 	private String nameContains;
@@ -90,6 +88,7 @@ public class ViewController {
 		        setText(item == null ? null : item.getName() );
 		    }
 		});
+		
 	}
 	
 	// File I/O
@@ -256,7 +255,7 @@ public class ViewController {
 		return false;
 	}
 	
-	private String GetUniqueID()
+	public String GetUniqueID()
 	{
 		String ID = nxtRandomID();
 		

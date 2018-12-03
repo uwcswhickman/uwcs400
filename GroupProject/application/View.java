@@ -118,7 +118,7 @@ public class View extends Application {
 		rtnBox.setPadding(new Insets(5, 5, 5, 5));
 		Label lblOptions = new Label("Food Options");
 		lblOptions.setFont(Font.font("Ariel", 18));
-		Button btnLoadList = newButton("Load List");
+		Button btnLoadList = newButton("Load List", "btnLoadList", true);
 		btnLoadList.setTooltip(new Tooltip("Load new options list from a file"));
 		btnLoadList.setOnAction(
 				new EventHandler<ActionEvent>()
@@ -130,7 +130,7 @@ public class View extends Application {
 						dialog.show();
 					}
 				});
-		Button btnSaveList = newButton("Save List");
+		Button btnSaveList = newButton("Save List", "btnSaveList", true);
 		btnSaveList.setTooltip(new Tooltip("Save current options list to a file in alphabetical order"));
 		rtnBox.setMinHeight(topHeight);
 		rtnBox.setMinWidth(leftWidth);
@@ -165,10 +165,10 @@ public class View extends Application {
 		rtnBox.setMinWidth(leftWidth);
 		rtnBox.setAlignment(Pos.TOP_CENTER);
 		
-		Button btnNewItem = newButton("Add New Item");
+		Button btnNewItem = newButton("Add New Item", "btnNewItem", true);
 		btnNewItem.setTooltip(new Tooltip("Add a custom food item to the options list"));
 		
-		Button btnFilters = newButton("Filters");
+		Button btnFilters = newButton("Filters", "btnFilters", true);
 		btnFilters.setTooltip(new Tooltip("Apply filters to narrow down the options list"));
 		btnFilters.setOnAction(
 				new EventHandler<ActionEvent>()
@@ -180,7 +180,7 @@ public class View extends Application {
 						dialog.show();
 					}
 				});
-		Button btnClearFilters = newButton("Clear Filters");
+		Button btnClearFilters = newButton("Clear Filters", "btnClearFilters", true);
 		btnClearFilters.setTooltip(new Tooltip("Remove any filters currently applied to the options list"));
 		btnClearFilters.setOnAction(
 				new EventHandler<ActionEvent>()
@@ -205,10 +205,10 @@ public class View extends Application {
 		rtnBox.setMinHeight(middleHeight);
 		rtnBox.setMinWidth(centerWidth);
 		rtnBox.setAlignment(Pos.CENTER);
-		Button btnAddItem = newButton("Add to Meal");
+		Button btnAddItem = newButton("Add to Meal", "btnAddItem", true);
 		btnAddItem.setTooltip(new Tooltip("Add selected item to meal list"));
 		//btnAddItem.getStyleClass().add("add-button"); // makes it green on hover
-		Button btnRemoveItem = newButton("Remove from Meal");
+		Button btnRemoveItem = newButton("Remove from Meal", "btnRemoveItem", true);
 		btnRemoveItem.setTooltip(new Tooltip("Remove selected item from meal list"));
 		//btnRemoveItem.getStyleClass().add("remove-button"); // makes it dark red on hover
 		btnAddItem.setMaxWidth(Double.MAX_VALUE);
@@ -246,19 +246,12 @@ public class View extends Application {
 		HBox rtnBox = new HBox();
 		rtnBox.setMinHeight(bottomHeight);
 		rtnBox.setMinWidth(rightWidth);
-		Button btnAnalyze = newButton("Analyze");
+		Button btnAnalyze = newButton("Analyze", "btnAnalyze", true);
 		btnAnalyze.setTooltip(new Tooltip("Analyze nutrient totals from the current meal"));
 		Pane spacer = new Pane();
 	    HBox.setHgrow(spacer, Priority.ALWAYS);
 		rtnBox.getChildren().addAll(spacer, btnAnalyze);
 		return rtnBox;
-	}
-	
-	private Button newButton(String btnCaption)
-	{
-		Button rtnButton = new Button(btnCaption);
-		rtnButton.setMinWidth(minButtonSize);
-		return rtnButton;
 	}
 	
 	private Stage GetFilterPopUp()
@@ -314,7 +307,7 @@ public class View extends Application {
 		val.setMaxHeight(45);
 		Pane spacer = new Pane();
 		HBox.setHgrow(spacer, Priority.ALWAYS);
-		Button btnAddAttRule = new Button("Add filter");
+		Button btnAddAttRule = newButton("Add filter", "btnAddAttRule", false);
 		btnAddAttRule.setOnAction(
 				new EventHandler<ActionEvent>()
 				{
@@ -338,7 +331,7 @@ public class View extends Application {
 		HBox nameFilterRow = new HBox();
 		TextField nameField = new TextField();
 		nameField.setMaxHeight(45);
-		Button btnAddNameFilter = new Button("Add filter");
+		Button btnAddNameFilter = newButton("Add filter", "btnAddNameFilter", false);
 		btnAddNameFilter.setOnAction(
 				new EventHandler<ActionEvent>()
 				{
@@ -372,7 +365,7 @@ public class View extends Application {
 		HBox applyAndClearButtons = new HBox();
 		Pane bottomSpacer = new Pane();
 		HBox.setHgrow(bottomSpacer, Priority.ALWAYS);
-		Button btnApply = new Button("Apply filters");
+		Button btnApply = newButton("Apply filters", "btnApply", false);
 		btnApply.setOnAction(
 				new EventHandler<ActionEvent>()
 				{
@@ -383,7 +376,7 @@ public class View extends Application {
 						filters.close();
 					}
 				});
-		Button btnClear = new Button("Clear filters");
+		Button btnClear = newButton("Clear filters", "btnClear", false);
 		btnClear.setOnAction(
 				new EventHandler<ActionEvent>()
 				{
@@ -427,30 +420,15 @@ public class View extends Application {
 		return rtnStage;
 	}
 	
-	private class NumberTextField extends TextField
+	private Button newButton(String btnCaption, String ID, boolean enforceMinWidth)
 	{
-
-	    @Override
-	    public void replaceText(int start, int end, String text)
-	    {
-	        if (validate(text))
-	        {
-	            super.replaceText(start, end, text);
-	        }
-	    }
-
-	    @Override
-	    public void replaceSelection(String text)
-	    {
-	        if (validate(text))
-	        {
-	            super.replaceSelection(text);
-	        }
-	    }
-
-	    private boolean validate(String text)
-	    {
-	        return text.matches("[0-9]*");
-	    }
+		Button rtnButton = new Button(btnCaption);
+		rtnButton.setId(ID);
+		if (enforceMinWidth)
+		{
+			rtnButton.setMinWidth(minButtonSize);
+		}
+		
+		return rtnButton;
 	}
 }
