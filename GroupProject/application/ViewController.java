@@ -110,7 +110,6 @@ public class ViewController {
 	// Meal methods
 	public ListView<FoodItem> GetMeal()
 	{
-		this.mealListProperty.add(this.foodOptionsProperty.get(0));
 		return this.mealLV;
 	}
 	
