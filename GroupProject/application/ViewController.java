@@ -7,80 +7,84 @@ import java.util.List;
 import java.util.Random;
 import java.util.TreeMap;
 
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 
 /**
  * 
  * Resources
  *   Observable list implementation learned from https://rterp.wordpress.com/2015/09/21/binding-a-list-of-strings-to-a-javafx-listview
+ *   Cell factory from https://stackoverflow.com/questions/44597921/how-to-specify-what-property-a-javafx-listview-should-display-when-using-a-custo
  *   Styling from combination of various sources including
  *   - https://docs.oracle.com/javafx/2/layout/size_align.htm
  *   - http://fxexperience.com/2011/12/styling-fx-buttons-with-css/
  *   - https://docs.oracle.com/javafx/2/api/javafx/scene/doc-files/cssref.html
  *   - https://stackoverflow.com/questions/43508511/hover-and-pressed-in-javafx
- *   - 
  * @author Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
  *
  */
 public class ViewController {
 	
+	// model
 	private FoodData sessionData;
 	private List<FoodItem> meal;
-	private List<String> rules;
 	private String nameContains;
+	private List<String> attributeRules;
 	private HashMap<String, FoodItem> idIndex; // for double-checking that new IDs we generate aren't already taken
 	private Random rng; // for generating IDs. Should have just one instance so that we're not ending up with the same ID if we run it in quick succession
+	private SimpleListProperty<String> allFiltersProperty; // for binding to Filters ListView
+	private SimpleListProperty<FoodItem> foodOptionsProperty; // for binding to Filters ListView
+	private SimpleListProperty<FoodItem> mealListProperty; // for binding to Filters ListView
 	
+	// ListViews
+	private ListView<String> allFiltersLV;
+	private ListView<FoodItem> foodOptionsLV;
+	private ListView<FoodItem> mealLV;
+		
 	public ViewController()
 	{
 		// instantiate sessionData object using foodItems.csv in current directory
 		// initialize idIndex from our data
 		// instantiate other fields with empty objects
-	}
-	
-	public List<String> dummyOptions()
-	{
-		List<String> rtnList = new LinkedList<String>();
-		rtnList.add("Tinkyada_BrownRice14OzPasta");
-		rtnList.add("AlFresco_ChickenSausageBurgersHotItalianStyle");
-		rtnList.add("EccePanis_EuropeanBaguette");
-		rtnList.add("Tostitos_TortillaChipsThickHeartyRounds");
-		rtnList.add("Keebler_SimplyMadeCookiesButter");
-		rtnList.add("Swanson_ChickenBreastWhitePremiumChunkinWater");
-		rtnList.add("Arnold_BreadPremiumWhiteEnriched");
-		rtnList.add("SamsChoice_AllNaturalChocolateIceCream");
-		rtnList.add("GreatValue_FudgeDoubleFilledTwistShoutSandwichCookies");
-		rtnList.add("AndrewEverett_ShreddedCheeseMozzarella");
-		rtnList.add("Zoglos_HotDogsSavoryMeatlessFranks");
-		rtnList.add("Kraft_CheeseItalianThreeCheese");
-		rtnList.add("MarketDay_MiniOmeletswithReducedFatCheese");
-		rtnList.add("MedicalWeightLossClinic_FruitDrinkMixedBerry");
-		rtnList.add("LowesFoods_ShreddedCheeseMildCheddar");
-		rtnList.add("Herrs_PotatoChipsFiremansBBQChicken");
-		rtnList.add("Reese_TroutGoldenSmokedFillets375Oz");
-		rtnList.add("RaisinBran_RaisinBran");
-		rtnList.add("MorningFreshFarms_FancyShreddedNaturalCheeseSharpCheddar");
-		rtnList.add("AmericasChoice_RipePittedLargeOlives");
-		rtnList.add("SafewayKitchens_ChickenKiev");
-		rtnList.add("Goya_EmpanadasBeef");
-		rtnList.add("HurricaneBay_SouthwesternMarinade");
-		rtnList.add("PopcornIndiana_AgedWhiteCheddarPopcorn");
-		rtnList.add("MidwestCountryFare_TomatoesWholePeeled");
-		rtnList.add("HeritageFarm_Bologna");
-		rtnList.add("HillCountryFare_HoneySweetCornBread");
-		rtnList.add("Giant_CheddarCheeseTwiceBakedPotatoes");
-		rtnList.add("Spartan_ShreddedMozzarellaCheese");
-		rtnList.add("Detour_EnergyBarChocolatePeanutButter");
-		rtnList.add("JuicyJuice_100JuiceApple");
-		rtnList.add("Welchs_FrozenSmoothieKitBlueberryCherryBlend");
-		rtnList.add("FairOaksFarms_MilkFatFree");
-		rtnList.add("GhirardelliChocolate_DarkMeltingWafers");
-		rtnList.add("BumbleBee_RedSalmonWildAlaskaSockeye");
-		rtnList.add("GoldEmblem_LuxuryWafers");
-		rtnList.add("Borden_PunchPineappleBanana");
-		rtnList.add("Hormel_FranksWranglersCoarseGroundCheeseSmoked");
-		Collections.sort(rtnList);
-		return rtnList;
+		this.sessionData = new FoodData();
+		
+		// food options list initial setup
+		this.foodOptionsLV = new ListView<FoodItem>();
+		this.foodOptionsProperty = new SimpleListProperty<FoodItem>(FXCollections.observableArrayList());
+		this.foodOptionsLV.itemsProperty().bind(foodOptionsProperty);
+		this.foodOptionsProperty.addAll(this.sessionData.getAllFoodItems());
+
+		// cells will show only the item's name
+		this.foodOptionsLV.setCellFactory(lv -> new ListCell<FoodItem>() {
+		    @Override
+		    protected void updateItem(FoodItem item, boolean empty) {
+		        super.updateItem(item, empty);
+		        setText(item == null ? null : item.getName() );
+		    }
+		});
+		
+		// filters list that we'll show in a pop-up
+		this.allFiltersLV = new ListView<String>();
+		this.allFiltersProperty =  new SimpleListProperty<String>(FXCollections.observableArrayList());
+		this.allFiltersLV.itemsProperty().bind(allFiltersProperty);
+		this.nameContains = "";
+		this.attributeRules = new LinkedList<String>();
+		
+		// meal initial setup
+		this.mealLV = new ListView<FoodItem>();
+		this.mealListProperty = new SimpleListProperty<FoodItem>(FXCollections.observableArrayList());
+		this.mealLV.itemsProperty().bind(mealListProperty);
+
+		// cells will show only the item's name
+		this.mealLV.setCellFactory(lv -> new ListCell<FoodItem>() {
+		    @Override
+		    protected void updateItem(FoodItem item, boolean empty) {
+		        super.updateItem(item, empty);
+		        setText(item == null ? null : item.getName() );
+		    }
+		});
 	}
 	
 	// File I/O
@@ -136,7 +140,7 @@ public class ViewController {
 	
 	public String GetDefaultNutrient()
 	{
-		return Constants.Nutrient.values()[0].toString();
+		return Constants.Nutrient.values()[2].toString(); // carbohydrate, because it's the longest one and makes the window initialize to the largest size it needs to be
 	}
 	
 	public List<String> GetAllComparators()
@@ -149,43 +153,95 @@ public class ViewController {
 		return Constants.Comparators.get(0);
 	}
 	
-	public ListView<String> GetAllFilters()
+	public ListView<String> GetFiltersListView()
 	{
-		ListView<String> rtnLV = new ListView<String>();
-		
-		return rtnLV;
+		return allFiltersLV;
 	}
 	
 	public void AddNameFilter(String nameContains)
 	{
-		
+		if (!isNullOrEmpty(nameContains))
+		{
+			if (!isNullOrEmpty(this.nameContains))
+			{
+				this.allFiltersProperty.remove("Name contains " + this.nameContains);
+			}
+			this.allFiltersProperty.add("Name contains " + nameContains);
+			this.nameContains = nameContains;
+		}
 	}
 	
-	public void AddRule(Constants.Nutrient attribute, String compareSymbol, String val)
+	public void AddRule(String attribute, String compareSymbol, String val)
 	{
-		// toString the enums, parse the value to make sure it's a double, and make a rule with it and add to this.rules
+		if (!isNullOrEmpty(attribute) && !isNullOrEmpty(compareSymbol) && !isNullOrEmpty(val))
+		{
+			String newRule = attribute + " " + compareSymbol + " " + val;
+			this.attributeRules.add(newRule);
+			this.allFiltersProperty.add(newRule);
+		}
 	}
 	
 	public void ClearRules()
 	{
-		// clear all rules
+		this.allFiltersProperty.clear();
+		this.nameContains = "";
+		this.attributeRules.clear();
+	}
+	
+	public void ApplyFilters()
+	{
+		this.foodOptionsProperty.clear();
+		
+		List<FoodItem> filtered = null;
+		
+		if (!isNullOrEmpty(this.nameContains))
+		{
+			filtered = this.sessionData.filterByName(this.nameContains);
+		}
+		if (!this.attributeRules.isEmpty())
+		{
+			if (filtered == null)
+			{
+				filtered = this.sessionData.filterByNutrients(this.attributeRules);
+			}
+			else
+			{
+				List<FoodItem> byRules = this.sessionData.filterByNutrients(this.attributeRules);
+				if (byRules != null)
+				{
+					filtered.retainAll(byRules);
+				}
+			}
+		}
+		if (filtered == null)
+		{
+			this.foodOptionsProperty.addAll(this.sessionData.getAllFoodItems());
+		}
+		else
+		{
+			TreeMap<String, FoodItem> sortedByName = new TreeMap<String, FoodItem>();
+			for (FoodItem nxt: filtered)
+			{
+				sortedByName.put(nxt.getName(), nxt);
+			}
+			this.foodOptionsProperty.addAll(sortedByName.values());
+		}
 	}
 	
 	// Options methods
-	public ListView<String> GetFoodOptions()
+	public ListView<FoodItem> GetFoodOptionsListView()
 	{
-		ListView<String> rtnLV = new ListView<String>();
-		rtnLV.getItems().addAll(this.dummyOptions());
-		return rtnLV;
-//		GetFoodOptions("", null); // for real implementation, we should run regular method with no inputs, which will give the full list 
+		return foodOptionsLV; 
 	}
 	
-	public ListView<String> GetFoodOptions(String nameContains, List<String> rules)
-	{
-		// get filtered by name and get filtered by nutrient, then probably take the smaller one and use use retainAll to find intersection to return
-		return new ListView<String>();
-	}
-	
+	//https://www.programiz.com/java-programming/examples/string-empty-null
+	public static boolean isNullOrEmpty(String str) {
+        if(str != null && !str.trim().isEmpty())
+        {
+        	return false;
+        }
+        return true;
+    }
 	
 	// Add food item
 	public boolean AddFoodItem(String name, String calories, String fat, String carbohydrate, String fiber, String protein)

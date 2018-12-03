@@ -172,12 +172,12 @@ public class FoodData implements FoodDataADT<FoodItem> {
     	if (substring.length() < 3)
     	{
     		// we don't have any indices this small, so we'll just have to loop over the whole set
-    		oneByOneCheck = this.foodItemList;
+    		oneByOneCheck = this.sortedByName.values();
     	}
     	else
     	{
     		HashSet<FoodItem> currentList = new HashSet<FoodItem>(); 
-    		for (FoodItem nxt: this.foodItemList)
+    		for (FoodItem nxt: this.sortedByName.values())
     		{
     			currentList.add(nxt);
     		}
@@ -187,7 +187,7 @@ public class FoodData implements FoodDataADT<FoodItem> {
         		{
         			String toSrch = substring.substring(i, i + 5);
         			filterBySubString(currentList, toSrch);
-        			if (currentList.size() == 1)
+        			if (currentList.size() <= 1)
         			{
         				break;
         			}
@@ -199,7 +199,7 @@ public class FoodData implements FoodDataADT<FoodItem> {
         		{
         			String toSrch = substring.substring(i, i + 3);
         			filterBySubString(currentList, toSrch);
-        			if (currentList.size() == 1)
+        			if (currentList.size() <= 1)
         			{
         				break;
         			}
@@ -222,7 +222,14 @@ public class FoodData implements FoodDataADT<FoodItem> {
     {
     	HashSet<FoodItem> bySubstring = this.nameIndex.get(substring);
     	
-    	startingList.retainAll(bySubstring);
+    	if (bySubstring != null)
+    	{
+    		startingList.retainAll(bySubstring);
+    	}
+    	else
+    	{
+    		startingList.clear();
+    	}
     }
 
     /*

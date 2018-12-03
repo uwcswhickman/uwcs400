@@ -1,5 +1,7 @@
 package application;
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -23,10 +25,12 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 /**
  * Resources
  * Pop-up implementation from here: https://stackoverflow.com/questions/22166610/how-to-create-a-popup-windows-in-javafx
+ * numeric text field from here: https://stackoverflow.com/questions/7555564/what-is-the-recommended-way-to-make-a-numeric-textfield-in-javafx
  * Styling tips from combination of various sources including
  *   - https://docs.oracle.com/javafx/2/layout/size_align.htm
  *   - http://fxexperience.com/2011/12/styling-fx-buttons-with-css/
@@ -78,12 +82,8 @@ public class View extends Application {
 			parent.add(GetOptionsListBox(), 0, 1);
 			// bottom left - filters etc.
 			parent.add(GetOptionsListButtons(), 0, 2);
-			// top center - dummy just to make it make sense for now. can remove later
-			parent.add(new VBox(), 1, 0); 
 			// middle center - Add/remove items from meal list
 			parent.add(GetAddRemoveButtons(), 1, 1);
-			// bottm center - dummy just to make it make sense for now. can remove later
-			parent.add(new VBox(), 1, 2); 
 			// top right - Meal list lable
 			parent.add(GetMealLabel(), 2, 0);
 			// middle right - scrollable meal list
@@ -147,7 +147,7 @@ public class View extends Application {
 	private VBox GetOptionsListBox()
 	{
 		VBox rtnBox = new VBox();
-		ListView<String> foodList = controller.GetFoodOptions();	// unfiltered options - currently a dummy hard-coded list
+		ListView<FoodItem> foodList = controller.GetFoodOptionsListView();	// unfiltered options - currently a dummy hard-coded list
 		foodList.getStyleClass().add("options-list");
 		rtnBox.setMinHeight(middleHeight);
 		rtnBox.setMinWidth(leftWidth);
@@ -181,6 +181,16 @@ public class View extends Application {
 				});
 		Button btnClearFilters = newButton("Clear Filters");
 		btnClearFilters.setTooltip(new Tooltip("Remove any filters currently applied to the options list"));
+		btnClearFilters.setOnAction(
+				new EventHandler<ActionEvent>()
+				{
+					@Override
+					public void handle(ActionEvent event)
+					{
+						controller.ClearRules();
+						controller.ApplyFilters();
+					}
+				});
 		Pane spacer = new Pane();
 	    HBox.setHgrow(spacer, Priority.ALWAYS);
 		rtnBox.getChildren().addAll(spacer, btnNewItem, btnFilters, btnClearFilters);
@@ -253,6 +263,21 @@ public class View extends Application {
 	private Stage GetFilterPopUp()
 	{
 		VBox root = new VBox();
+		// Create scene and stage
+		Scene filterScene = new Scene(root);
+		// add standard styling to make it look consistent
+		filterScene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
+		Stage filters = new Stage();
+		// make modal and set app's primary stage as the owner
+		filters.initModality(Modality.APPLICATION_MODAL);
+		filters.initOwner(this.primaryStage);
+		filters.setTitle("Filters");
+		filters.setScene(filterScene);
+		filters.setOnHidden(new EventHandler<WindowEvent>() {
+	          public void handle(WindowEvent we) {
+	              controller.ApplyFilters();
+	          }
+	      });
 		
 		// attributes label
 		HBox firstRow = new HBox();
@@ -271,15 +296,35 @@ public class View extends Application {
 		// add all comparators from the Comparators const list: <=, ==, >=
 		comparatorSelector.getItems().addAll(controller.GetAllComparators());
 		comparatorSelector.setValue(controller.GetDefaultComparator()); // first entry in the list
-		
+		// value to compare to
 		TextField val = new TextField();
+		// make it numeric only
+		val.textProperty().addListener(new ChangeListener<String>() {
+		    @Override
+		    public void changed(ObservableValue<? extends String> observable, String oldValue, 
+		        String newValue) {
+		        if (!newValue.matches("\\d*")) {
+		        	val.setText(newValue.replaceAll("[^\\d]", ""));
+		        }
+		    }
+		});
+		val.getStyleClass().add("number-field");
 		val.setMaxWidth(45);
 		val.setMaxHeight(45);
 		Pane spacer = new Pane();
 		HBox.setHgrow(spacer, Priority.ALWAYS);
-		Button btnAdd = new Button("Add filter");
+		Button btnAddAttRule = new Button("Add filter");
+		btnAddAttRule.setOnAction(
+				new EventHandler<ActionEvent>()
+				{
+					@Override
+					public void handle(ActionEvent event)
+					{
+						controller.AddRule(attSelector.getValue(), comparatorSelector.getValue(), val.getText());
+					}
+				});
 		
-		attFilterRow.getChildren().addAll(attSelector, comparatorSelector, val, spacer, btnAdd);
+		attFilterRow.getChildren().addAll(attSelector, comparatorSelector, val, spacer, btnAddAttRule);
 		root.getChildren().add(attFilterRow);
 		
 		// name filter label row
@@ -290,11 +335,21 @@ public class View extends Application {
 		
 		// name filter row
 		HBox nameFilterRow = new HBox();
-		TextField name = new TextField();
-		name.setMaxHeight(45);
+		TextField nameField = new TextField();
+		nameField.setMaxHeight(45);
 		Button btnAddNameFilter = new Button("Add filter");
-		HBox.setHgrow(name, Priority.ALWAYS);
-		nameFilterRow.getChildren().addAll(name, btnAddNameFilter);
+		btnAddNameFilter.setOnAction(
+				new EventHandler<ActionEvent>()
+				{
+					@Override
+					public void handle(ActionEvent event)
+					{
+						controller.AddNameFilter(nameField.getText());
+					}
+				});
+		
+		HBox.setHgrow(nameField, Priority.ALWAYS);
+		nameFilterRow.getChildren().addAll(nameField, btnAddNameFilter);
 		root.getChildren().add(nameFilterRow);
 		
 		// selected filter summary label
@@ -305,20 +360,41 @@ public class View extends Application {
 		
 		// selected filters summary list
 		VBox summaryListContainer = new VBox();
-		ListView<String> summary = controller.GetAllFilters();
+		ListView<String> summary = controller.GetFiltersListView();
 		summary.getStyleClass().add("no-op-list"); // don't allow row selection or highlighting, since we're not allowing manipulation on a row level
 		summary.setPrefHeight(100);
 		summaryListContainer.getChildren().add(summary);
 		summaryListContainer.setFillWidth(true);
 		root.getChildren().add(summaryListContainer);
 		
-		Scene filterScene = new Scene(root);
-		filterScene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
-		Stage filters = new Stage();
-		filters.initModality(Modality.APPLICATION_MODAL);
-		filters.initOwner(this.primaryStage);
-		filters.setTitle("Filters");
-		filters.setScene(filterScene);
+		// apply filters and clear filters buttons
+		HBox applyAndClearButtons = new HBox();
+		Pane bottomSpacer = new Pane();
+		HBox.setHgrow(bottomSpacer, Priority.ALWAYS);
+		Button btnApply = new Button("Apply filters");
+		btnApply.setOnAction(
+				new EventHandler<ActionEvent>()
+				{
+					@Override
+					public void handle(ActionEvent event)
+					{
+						// update list associated with options
+						filters.close();
+					}
+				});
+		Button btnClear = new Button("Clear filters");
+		btnClear.setOnAction(
+				new EventHandler<ActionEvent>()
+				{
+					@Override
+					public void handle(ActionEvent event)
+					{
+						controller.ClearRules();
+					}
+				});
+		applyAndClearButtons.getChildren().addAll(bottomSpacer, btnApply, btnClear);
+		root.getChildren().add(applyAndClearButtons);
+		
 		return filters;
 	}
 	
@@ -342,12 +418,38 @@ public class View extends Application {
 		Scene scene = new Scene(root);
 		// add standard styling to make it look consistent
 		scene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
-		
 		Stage rtnStage = new Stage();
 		rtnStage.initModality(Modality.APPLICATION_MODAL);
 		rtnStage.initOwner(this.primaryStage);
 		rtnStage.setTitle("Pop-up Title");
 		rtnStage.setScene(scene);
 		return rtnStage;
+	}
+	
+	private class NumberTextField extends TextField
+	{
+
+	    @Override
+	    public void replaceText(int start, int end, String text)
+	    {
+	        if (validate(text))
+	        {
+	            super.replaceText(start, end, text);
+	        }
+	    }
+
+	    @Override
+	    public void replaceSelection(String text)
+	    {
+	        if (validate(text))
+	        {
+	            super.replaceSelection(text);
+	        }
+	    }
+
+	    private boolean validate(String text)
+	    {
+	        return text.matches("[0-9]*");
+	    }
 	}
 }
