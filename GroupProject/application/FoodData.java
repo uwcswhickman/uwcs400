@@ -24,17 +24,11 @@ public class FoodData implements FoodDataADT<FoodItem> {
     // List of all the food items.
     private List<FoodItem> foodItemList;
     
-    // food items alphabetically ordered by name
-    private TreeMap<String, FoodItem> sortedByName;
-    
     // hashed set of all of the food items for quick lookup while applying filters
     private HashSet<FoodItem> foodItemLookup;
     
     // Map of nutrients and their corresponding index
     private HashMap<String, BPTree<Double, FoodItem>> indexes;
-    
-    // name lookup index with chunks of size 3 & 5
-    private HashMap<String, HashSet<FoodItem>> nameIndex;
         
     /**
      * Public constructor
@@ -43,13 +37,11 @@ public class FoodData implements FoodDataADT<FoodItem> {
         this.foodItemList = new LinkedList<FoodItem>();
         this.foodItemLookup = new HashSet<FoodItem>();
         this.indexes = new HashMap<String, BPTree<Double, FoodItem>>();
-        this.nameIndex = new HashMap<String, HashSet<FoodItem>>();
-        this.sortedByName = new TreeMap<String, FoodItem>();
         for (Constants.Nutrient nxt: Constants.Nutrient.values())
         {
         	this.indexes.put(nxt.toString(), new BPTree<Double, FoodItem>(3));
         }
-        this.loadFoodItems("C:\\WillSource\\CS400\\uwcs400\\GroupProject\\foodItems.csv");
+        this.loadFoodItems(Constants.InitialDataPath);
     }
     
     
@@ -103,6 +95,8 @@ public class FoodData implements FoodDataADT<FoodItem> {
      */
     private List<String> loadFromFile(String filePath) throws FileNotFoundException
     {
+    	int numToLoad = 100000;
+    	
     	List<String> rtnList = new LinkedList<String>();
     	
     	File file = new File( filePath );
@@ -111,7 +105,7 @@ public class FoodData implements FoodDataADT<FoodItem> {
         {
 			Scanner inFile = new Scanner(file);
 			
-            while (inFile.hasNextLine())
+            while (inFile.hasNextLine() && rtnList.size() <= numToLoad)
             {
                 rtnList.add(inFile.nextLine());
             }
@@ -163,53 +157,13 @@ public class FoodData implements FoodDataADT<FoodItem> {
      */
     @Override
     public List<FoodItem> filterByName(String substring) {
+    	
     	substring = substring.toLowerCase();
     	
     	LinkedList<FoodItem> rtnList = new LinkedList<FoodItem>();
     	
-    	Collection<FoodItem> oneByOneCheck;
-    	
-    	if (substring.length() < 3)
-    	{
-    		// we don't have any indices this small, so we'll just have to loop over the whole set
-    		oneByOneCheck = this.sortedByName.values();
-    	}
-    	else
-    	{
-    		HashSet<FoodItem> currentList = new HashSet<FoodItem>(); 
-    		for (FoodItem nxt: this.sortedByName.values())
-    		{
-    			currentList.add(nxt);
-    		}
-    		if (substring.length() >= 5)
-        	{
-    			for (int i = 0; i <= substring.length() - 5; i++)
-        		{
-        			String toSrch = substring.substring(i, i + 5);
-        			filterBySubString(currentList, toSrch);
-        			if (currentList.size() <= 1)
-        			{
-        				break;
-        			}
-        		}
-        	}
-        	else
-        	{
-        		for (int i = 0; i < substring.length() - 3; i++)
-        		{
-        			String toSrch = substring.substring(i, i + 3);
-        			filterBySubString(currentList, toSrch);
-        			if (currentList.size() <= 1)
-        			{
-        				break;
-        			}
-        		}
-        	}
-    		// now we should have a pretty filtered down list, depending on how long the original search string was
-    		oneByOneCheck = currentList;
-    	}
     	// hopefully this is a small list (probably just one element), but if search string is 2 or fewer characters, this could take a while
-    	for (FoodItem nxt: oneByOneCheck)
+    	for (FoodItem nxt: this.foodItemList)
 		{
 			if (nxt.getName().toLowerCase().contains(substring))
 			{
@@ -217,19 +171,6 @@ public class FoodData implements FoodDataADT<FoodItem> {
 			}
 		}
         return rtnList;
-    }
-    private void filterBySubString(HashSet<FoodItem> startingList, String substring)
-    {
-    	HashSet<FoodItem> bySubstring = this.nameIndex.get(substring);
-    	
-    	if (bySubstring != null)
-    	{
-    		startingList.retainAll(bySubstring);
-    	}
-    	else
-    	{
-    		startingList.clear();
-    	}
     }
 
     /*
@@ -281,37 +222,16 @@ public class FoodData implements FoodDataADT<FoodItem> {
     public void addFoodItem(FoodItem foodItem) {
         this.foodItemList.add(foodItem);
         this.foodItemLookup.add(foodItem);
-        String sortKey = foodItem.getName() + foodItem.getID();	// combine name and ID, since name isn't guaranteed to be unique
-        this.sortedByName.put(sortKey, foodItem);
+        if (this.foodItemList.size() % 10000 == 0)
+        {
+        	System.out.println("Item " + this.foodItemList.size());
+        }
         // add to the nutrient index
         for (String nutrient: foodItem.getNutrients().keySet())
         {
         	double amt = foodItem.getNutrientValue(nutrient);
         	BPTree<Double, FoodItem> idx = this.indexes.get(nutrient);
         	idx.insert(amt, foodItem);
-        }
-        // add to the name index
-        String name = foodItem.getName().toLowerCase();
-        if (foodItem.getName().length() >= 3)
-        {
-        	for (int i = 0; i < name.length() - 3; i++)
-        	{
-        		String nxtChnk = name.substring(i, i + 3);
-        		if (!this.nameIndex.containsKey(nxtChnk))
-        		{
-        			this.nameIndex.put(nxtChnk, new HashSet<FoodItem>());
-        		}
-        		this.nameIndex.get(nxtChnk).add(foodItem);
-        	}
-        	for (int i = 0; i < name.length() - 5; i++)
-        	{
-        		String nxtChnk = name.substring(i, i + 5);
-        		if (!this.nameIndex.containsKey(nxtChnk))
-        		{
-        			this.nameIndex.put(nxtChnk, new HashSet<FoodItem>());
-        		}
-        		this.nameIndex.get(nxtChnk).add(foodItem);
-        	}
         }
     }
 
@@ -321,14 +241,7 @@ public class FoodData implements FoodDataADT<FoodItem> {
      */
     @Override
     public List<FoodItem> getAllFoodItems() {
-    	LinkedList<FoodItem> rtnList = new LinkedList<FoodItem>();
-
-    	for (FoodItem nxt: this.sortedByName.values())
-    	{
-    		rtnList.add(nxt);
-    	}
-    	
-    	return rtnList;
+    	return this.foodItemList;
     }
     
     /**
@@ -337,7 +250,7 @@ public class FoodData implements FoodDataADT<FoodItem> {
      * @param filename name of the file where the data needs to be saved 
      */
     public void saveFoodItems(String filename) {
-    	List<String> formattedAndSorted = formatAndSortData(this.sortedByName);
+    	Collection<String> formattedAndSorted = formatAndSortData(this.foodItemList);
     	
     	File file = new File( filename );
     	
@@ -359,15 +272,18 @@ public class FoodData implements FoodDataADT<FoodItem> {
 		catch (IOException e) { }
     }
     
-    private List<String> formatAndSortData(TreeMap<String, FoodItem> sortedByName)
+    private Collection<String> formatAndSortData(List<FoodItem> list)
     {
-    	List<String> rtnList = new LinkedList<String>();
     	
-    	for (FoodItem nxt: sortedByName.values())
+    	TreeMap<String, String> sortedByName = new TreeMap<String, String>();
+    	
+    	for (FoodItem nxt: list)
     	{
-    		rtnList.add(serializeFoodItem(nxt));
+    		String key = nxt.getName().toLowerCase() + nxt.getID();
+    		sortedByName.put(key, serializeFoodItem(nxt));
     	}
-    	return rtnList;
+    	
+    	return sortedByName.values();
     }
     
     private static String serializeFoodItem(FoodItem item)
@@ -391,9 +307,8 @@ public class FoodData implements FoodDataADT<FoodItem> {
     }
     
     public static void main(String[] args) {
-    	String filePath = "C:\\WillSource\\CS400\\uwcs400\\GroupProject\\foodItems.csv";
     	FoodData data = new FoodData();
-    	data.loadFoodItems(filePath);
+    	data.loadFoodItems(Constants.InitialDataPath);
     	List<FoodItem> allItems = data.getAllFoodItems();
     	System.out.println(allItems.size() + " items loaded");
     	testNameSearch(data, "aigR");

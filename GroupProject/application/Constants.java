@@ -12,12 +12,13 @@ import java.util.List;
  */
 public class Constants {
 	
-	public static final List<String> Comparators = Collections.unmodifiableList(
-		    new ArrayList<String>() {{
-		        add("<=");
-		        add("==");
-		        add(">=");
-		    }});
+	public static final int IDLENGTH = 24;
+	
+	public static final String InitialDataPath = System.getProperty("user.dir") + "\\foodItems.csv";
+	
+	public static final String[] Comparators = new String[] { "<=", "==", ">=" };
+	
+	public static final char[] HexDigits = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };	
 	
 	public enum Nutrient
 	{

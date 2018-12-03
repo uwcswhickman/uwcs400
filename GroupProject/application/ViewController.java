@@ -1,11 +1,14 @@
 package application;
 import java.io.FileNotFoundException;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.TreeMap;
+
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -27,12 +30,13 @@ import javafx.scene.control.ListView;
  */
 public class ViewController {
 	
+	
+	
 	// model
 	private FoodData sessionData;
-	private List<FoodItem> meal;
 	private String nameContains;
 	private List<String> attributeRules;
-	private HashMap<String, FoodItem> idIndex; // for double-checking that new IDs we generate aren't already taken
+	private HashSet<String> idIndex; // for double-checking that new IDs we generate aren't already taken
 	private Random rng; // for generating IDs. Should have just one instance so that we're not ending up with the same ID if we run it in quick succession
 	private SimpleListProperty<String> allFiltersProperty; // for binding to Filters ListView
 	private SimpleListProperty<FoodItem> foodOptionsProperty; // for binding to Filters ListView
@@ -49,7 +53,8 @@ public class ViewController {
 		// initialize idIndex from our data
 		// instantiate other fields with empty objects
 		this.sessionData = new FoodData();
-		
+		this.rng = new Random();
+		this.idIndex = new HashSet<String>();
 		// food options list initial setup
 		this.foodOptionsLV = new ListView<FoodItem>();
 		this.foodOptionsProperty = new SimpleListProperty<FoodItem>(FXCollections.observableArrayList());
@@ -143,14 +148,14 @@ public class ViewController {
 		return Constants.Nutrient.values()[2].toString(); // carbohydrate, because it's the longest one and makes the window initialize to the largest size it needs to be
 	}
 	
-	public List<String> GetAllComparators()
+	public String[] GetAllComparators()
 	{
 		return Constants.Comparators;
 	}
 	
 	public String GetDefaultComparator()
 	{
-		return Constants.Comparators.get(0);
+		return Constants.Comparators[0];
 	}
 	
 	public ListView<String> GetFiltersListView()
@@ -253,7 +258,23 @@ public class ViewController {
 	
 	private String GetUniqueID()
 	{
-		// somehow generate an ID and make sure it's unique (probably need to double check that it doens't overlap with anything in our current list)
-		return "";
+		String ID = nxtRandomID();
+		
+		while (this.idIndex.contains(ID))
+		{
+			ID = nxtRandomID();
+		}
+		
+		return ID;
+	}
+	
+	private String nxtRandomID()
+	{
+		char[] ID = new char[Constants.IDLENGTH];
+		for (int i = 0; i < Constants.IDLENGTH; i++)
+		{
+			ID[i] = Constants.HexDigits[rng.nextInt(Constants.HexDigits.length)];
+		}
+		return new String(ID);
 	}
 }
