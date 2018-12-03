@@ -31,6 +31,7 @@ import javafx.stage.WindowEvent;
  * Resources
  * Pop-up implementation from here: https://stackoverflow.com/questions/22166610/how-to-create-a-popup-windows-in-javafx
  * numeric text field from here: https://stackoverflow.com/questions/7555564/what-is-the-recommended-way-to-make-a-numeric-textfield-in-javafx
+ * focus and selection clearing in listviews - https://stackoverflow.com/questions/51520325/clear-selection-when-tableview-loses-focus
  * Styling tips from combination of various sources including
  *   - https://docs.oracle.com/javafx/2/layout/size_align.htm
  *   - http://fxexperience.com/2011/12/styling-fx-buttons-with-css/
@@ -62,6 +63,8 @@ public class View extends Application {
 	
 	private ViewController controller;
 	private Stage primaryStage;
+	private ListView<FoodItem> optionsList;
+	private ListView<FoodItem> meal;
 	
 	public static void main(String[] args) {
 		launch(args);
@@ -82,14 +85,14 @@ public class View extends Application {
 			parent.add(GetOptionsListBox(), 0, 1);
 			// bottom left - filters etc.
 			parent.add(GetOptionsListButtons(), 0, 2);
-			// middle center - Add/remove items from meal list
-			parent.add(GetAddRemoveButtons(), 1, 1);
 			// top right - Meal list lable
 			parent.add(GetMealLabel(), 2, 0);
 			// middle right - scrollable meal list
 			parent.add(GetMealList(), 2, 1);
 			// bottom right - analyze button
 			parent.add(GetMealAnalyzeButton(), 2, 2);
+			// middle center - Add/remove items from meal list - must initialize after GetOptionsListBox and GetMealList so that those two ListViews are already initialized
+			parent.add(GetAddRemoveButtons(this.optionsList, this.meal), 1, 1);
 			
 			// make main scene
 			Scene scene = new Scene(parent);
@@ -149,10 +152,16 @@ public class View extends Application {
 	{
 		VBox rtnBox = new VBox();
 		ListView<FoodItem> foodList = controller.GetFoodOptionsListView();	// unfiltered options - currently a dummy hard-coded list
-		foodList.getStyleClass().add("options-list");
+		foodList.getStyleClass().add("selectable-list");
+		foodList.focusedProperty().addListener((obs, oldVal, newVal) -> {
+		    if (!newVal) {
+		    	foodList.getSelectionModel().clearSelection();
+		    }
+		});
+		this.optionsList = foodList;
 		rtnBox.setMinHeight(middleHeight);
 		rtnBox.setMinWidth(leftWidth);
-		rtnBox.getChildren().add(foodList);
+		rtnBox.getChildren().addAll(foodList);
 		rtnBox.setFillWidth(true);
 		return rtnBox;
 	}
@@ -199,20 +208,23 @@ public class View extends Application {
 	}
 	
 	// Middle Center
-	private VBox GetAddRemoveButtons()
+	private VBox GetAddRemoveButtons(ListView<FoodItem> optionsList, ListView<FoodItem> meal)
 	{
 		VBox rtnBox = new VBox();
 		rtnBox.setMinHeight(middleHeight);
 		rtnBox.setMinWidth(centerWidth);
 		rtnBox.setAlignment(Pos.CENTER);
+		
 		Button btnAddItem = newButton("Add to Meal", "btnAddItem", true);
 		btnAddItem.setTooltip(new Tooltip("Add selected item to meal list"));
-		//btnAddItem.getStyleClass().add("add-button"); // makes it green on hover
+		btnAddItem.disableProperty().bind(optionsList.getSelectionModel().selectedItemProperty().isNull());
+		btnAddItem.setMaxWidth(Double.MAX_VALUE);
+		
 		Button btnRemoveItem = newButton("Remove from Meal", "btnRemoveItem", true);
 		btnRemoveItem.setTooltip(new Tooltip("Remove selected item from meal list"));
-		//btnRemoveItem.getStyleClass().add("remove-button"); // makes it dark red on hover
-		btnAddItem.setMaxWidth(Double.MAX_VALUE);
+		btnRemoveItem.disableProperty().bind(meal.getSelectionModel().selectedItemProperty().isNull());
 		btnRemoveItem.setMaxWidth(Double.MAX_VALUE);
+		
 		rtnBox.getChildren().addAll(btnAddItem, btnRemoveItem);
 		return rtnBox;
 	}
@@ -232,8 +244,14 @@ public class View extends Application {
 	private VBox GetMealList()
 	{
 		VBox rtnBox = new VBox();
-		ListView<String> mealList = controller.GetMeal();
-		mealList.getStyleClass().add("no-op-list");
+		ListView<FoodItem> mealList = controller.GetMeal();
+		mealList.getStyleClass().add("selectable-list");
+		mealList.focusedProperty().addListener((obs, oldVal, newVal) -> {
+		    if (!newVal) {
+		    	mealList.getSelectionModel().clearSelection();
+		    }
+		});
+		this.meal = mealList;
 		rtnBox.setMinHeight(middleHeight);
 		rtnBox.setMinWidth(rightWidth);
 		rtnBox.getChildren().add(mealList);

@@ -94,22 +94,22 @@ ListView {
     -fx-border-width:1px;
 }
 
-.options-list .list-cell:even {
+.selectable-list .list-cell:even {
 	-fx-background-color: rgb(240, 240, 240);
 	-fx-text-fill: rgb(57, 59, 61);
 }
-.options-list .list-cell:odd {
+.selectable-list .list-cell:odd {
 	-fx-background-color: rgb(230, 230, 230);
 	-fx-text-fill: rgb(57, 59, 61);
 }
 
-.options-list .list-cell:filled:selected:focused {
+.selectable-list .list-cell:filled:selected:focused {
     -fx-background-color: #6F9FD8; /* Little Boy Blue - https://www.w3schools.com/colors/colors_trends.asp */
     -fx-text-fill: rgb(240, 240, 240);
     -fx-font-weight: bold;
 }
 
-.options-list .list-cell:filled:selected {
+.selectable-list .list-cell:filled:selected {
 	-fx-background-color: #6F9FD8; /* Little Boy Blue - https://www.w3schools.com/colors/colors_trends.asp */
     -fx-text-fill: rgb(240, 240, 240);
     -fx-font-weight: bold;

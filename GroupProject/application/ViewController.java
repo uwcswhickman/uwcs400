@@ -108,11 +108,10 @@ public class ViewController {
 	}
 	
 	// Meal methods
-	public ListView<String> GetMeal()
+	public ListView<FoodItem> GetMeal()
 	{
-		ListView<String> rtnLV = new ListView<String>();
-		
-		return rtnLV;
+		this.mealListProperty.add(this.foodOptionsProperty.get(0));
+		return this.mealLV;
 	}
 	
 	public void AddToMeal(FoodItem toAdd)
