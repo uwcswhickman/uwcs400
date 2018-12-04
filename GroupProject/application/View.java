@@ -153,11 +153,6 @@ public class View extends Application {
 		VBox rtnBox = new VBox();
 		ListView<FoodItem> foodList = controller.GetFoodOptionsListView();	// unfiltered options - currently a dummy hard-coded list
 		foodList.getStyleClass().add("selectable-list");
-		foodList.focusedProperty().addListener((obs, oldVal, newVal) -> {
-		    if (!newVal) {
-		    	foodList.getSelectionModel().clearSelection();
-		    }
-		});
 		this.optionsList = foodList;
 		rtnBox.setMinHeight(middleHeight);
 		rtnBox.setMinWidth(leftWidth);
@@ -217,13 +212,71 @@ public class View extends Application {
 		
 		Button btnAddItem = newButton("Add to Meal", "btnAddItem", true);
 		btnAddItem.setTooltip(new Tooltip("Add selected item to meal list"));
-		btnAddItem.disableProperty().bind(optionsList.getSelectionModel().selectedItemProperty().isNull());
+		btnAddItem.setDisable(true);
 		btnAddItem.setMaxWidth(Double.MAX_VALUE);
+		
+		optionsList.focusedProperty().addListener(new ChangeListener<Boolean>()
+		{
+		    @Override
+		    public void changed(ObservableValue<? extends Boolean> arg0, Boolean hadFocus, Boolean hasFocus)
+		    {
+		        if (hasFocus)
+		        {
+		        	// if options list has focus, enable the Add button
+		        	btnAddItem.setDisable(false);
+		        }
+		        else if (!btnAddItem.isFocused())
+		        {
+		        	// if it doesn't have focus and the user clicked anything OTHER than the Add button, then disable the Add button
+		        	btnAddItem.setDisable(true);
+		        }
+		    }
+		});
+		btnAddItem.setOnAction(
+				new EventHandler<ActionEvent>()
+				{
+					@Override
+					public void handle(ActionEvent event)
+					{
+						FoodItem selected = optionsList.getSelectionModel().selectedItemProperty().getValue();
+						controller.AddToMeal(selected);
+						btnAddItem.setDisable(true); // disable the add button after clicked. it will re-enable when user clicks in the Options section again
+					}
+				});
 		
 		Button btnRemoveItem = newButton("Remove from Meal", "btnRemoveItem", true);
 		btnRemoveItem.setTooltip(new Tooltip("Remove selected item from meal list"));
-		btnRemoveItem.disableProperty().bind(meal.getSelectionModel().selectedItemProperty().isNull());
+		btnRemoveItem.setDisable(true);
 		btnRemoveItem.setMaxWidth(Double.MAX_VALUE);
+		meal.focusedProperty().addListener(new ChangeListener<Boolean>()
+		{
+		    @Override
+		    public void changed(ObservableValue<? extends Boolean> arg0, Boolean hadFocus, Boolean hasFocus)
+		    {
+		        if (hasFocus)
+		        {
+		        	// if options list has focus, enable the Add button
+		        	btnRemoveItem.setDisable(false);
+		        }
+		        else if (!btnRemoveItem.isFocused())
+		        {
+		        	// if it doesn't have focus and the user clicked anything OTHER than the Add button, then disable the Add button
+		        	btnRemoveItem.setDisable(true);
+		        }
+		    }
+		});
+		btnRemoveItem.setOnAction(
+				new EventHandler<ActionEvent>()
+				{
+					@Override
+					public void handle(ActionEvent event)
+					{
+						FoodItem selected = meal.getSelectionModel().selectedItemProperty().getValue();
+						controller.RemoveFromMeal(selected);
+						btnRemoveItem.setDisable(true); // disable the add button after clicked. it will re-enable when user clicks in the Options section again
+					}
+				});
+		
 		
 		rtnBox.getChildren().addAll(btnAddItem, btnRemoveItem);
 		return rtnBox;
@@ -246,11 +299,6 @@ public class View extends Application {
 		VBox rtnBox = new VBox();
 		ListView<FoodItem> mealList = controller.GetMeal();
 		mealList.getStyleClass().add("selectable-list");
-		mealList.focusedProperty().addListener((obs, oldVal, newVal) -> {
-		    if (!newVal) {
-		    	mealList.getSelectionModel().clearSelection();
-		    }
-		});
 		this.meal = mealList;
 		rtnBox.setMinHeight(middleHeight);
 		rtnBox.setMinWidth(rightWidth);

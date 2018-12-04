@@ -57,7 +57,12 @@ public class ViewController {
 		this.foodOptionsLV = new ListView<FoodItem>();
 		this.foodOptionsProperty = new SimpleListProperty<FoodItem>(FXCollections.observableArrayList());
 		this.foodOptionsLV.itemsProperty().bind(foodOptionsProperty);
-		this.foodOptionsProperty.addAll(this.sessionData.getAllFoodItems());
+		for (FoodItem nxt: this.sessionData.getAllFoodItems())
+		{
+			this.foodOptionsProperty.add(nxt);
+			this.idIndex.add(nxt.getID());
+		}
+		
 
 		// cells will show only the item's name
 		this.foodOptionsLV.setCellFactory(lv -> new ListCell<FoodItem>() {
@@ -89,6 +94,7 @@ public class ViewController {
 		    }
 		});
 		
+		System.out.println(GetUniqueID());
 	}
 	
 	// File I/O
@@ -115,12 +121,15 @@ public class ViewController {
 	
 	public void AddToMeal(FoodItem toAdd)
 	{
-		
+		if (!this.mealListProperty.contains(toAdd))
+		{
+			this.mealListProperty.add(toAdd);
+		}
 	}
 	
 	public void RemoveFromMeal(FoodItem toRemove)
 	{
-		
+		this.mealListProperty.remove(toRemove);
 	}
 	
 	public TreeMap<Constants.Nutrient, Double> GetMealAnalysis()

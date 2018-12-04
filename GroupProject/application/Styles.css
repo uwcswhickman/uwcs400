@@ -103,14 +103,14 @@ ListView {
 	-fx-text-fill: rgb(57, 59, 61);
 }
 
-.selectable-list .list-cell:filled:selected:focused {
+.selectable-list:focused .list-cell:filled:selected {
     -fx-background-color: #6F9FD8; /* Little Boy Blue - https://www.w3schools.com/colors/colors_trends.asp */
     -fx-text-fill: rgb(240, 240, 240);
     -fx-font-weight: bold;
 }
 
 .selectable-list .list-cell:filled:selected {
-	-fx-background-color: #6F9FD8; /* Little Boy Blue - https://www.w3schools.com/colors/colors_trends.asp */
+	-fx-background-color: #9BBCE4; /* lighter version of Little Boy Blue - https://www.w3schools.com/colors/colors_trends.asp */
     -fx-text-fill: rgb(240, 240, 240);
     -fx-font-weight: bold;
 }
@@ -124,6 +124,17 @@ ListView {
 	-fx-text-fill: rgb(57, 59, 61);
 }
 
+.no-op-list:focused .list-cell:filled:selected {
+    -fx-background-color: #6F9FD8; /* Little Boy Blue - https://www.w3schools.com/colors/colors_trends.asp */
+    -fx-text-fill: rgb(240, 240, 240);
+    -fx-font-weight: bold;
+}
+
+.no-op-list .list-cell:filled:selected {
+	-fx-background-color: #9BBCE4; /* lighter version of Little Boy Blue - https://www.w3schools.com/colors/colors_trends.asp */
+    -fx-text-fill: rgb(240, 240, 240);
+    -fx-font-weight: bold;
+}
 
 Button:hover {
     -fx-background-color: #3F69AA; /* Nebulas Blue - https://www.w3schools.com/colors/colors_trends.asp */

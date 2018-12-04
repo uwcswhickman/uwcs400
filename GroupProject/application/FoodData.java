@@ -95,7 +95,7 @@ public class FoodData implements FoodDataADT<FoodItem> {
      */
     private List<String> loadFromFile(String filePath) throws FileNotFoundException
     {
-    	int numToLoad = 100000;
+    	int numToLoad = 1000;
     	
     	List<String> rtnList = new LinkedList<String>();
     	
