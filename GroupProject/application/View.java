@@ -32,6 +32,7 @@ import javafx.stage.WindowEvent;
  * Pop-up implementation from here: https://stackoverflow.com/questions/22166610/how-to-create-a-popup-windows-in-javafx
  * numeric text field from here: https://stackoverflow.com/questions/7555564/what-is-the-recommended-way-to-make-a-numeric-textfield-in-javafx
  * focus and selection clearing in listviews - https://stackoverflow.com/questions/51520325/clear-selection-when-tableview-loses-focus
+ * focus and selection - https://stackoverflow.com/questions/17522686/javafx-tabpane-how-to-listen-to-selection-changes
  * Styling tips from combination of various sources including
  *   - https://docs.oracle.com/javafx/2/layout/size_align.htm
  *   - http://fxexperience.com/2011/12/styling-fx-buttons-with-css/
@@ -215,12 +216,11 @@ public class View extends Application {
 		btnAddItem.setDisable(true);
 		btnAddItem.setMaxWidth(Double.MAX_VALUE);
 		
-		optionsList.focusedProperty().addListener(new ChangeListener<Boolean>()
-		{
+		optionsList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<FoodItem>() {
 		    @Override
-		    public void changed(ObservableValue<? extends Boolean> arg0, Boolean hadFocus, Boolean hasFocus)
+		    public void changed(ObservableValue<? extends FoodItem> observable, FoodItem oldVal, FoodItem newVal)
 		    {
-		        if (hasFocus)
+		        if (optionsList.isFocused() && (newVal != null))
 		        {
 		        	// if options list has focus, enable the Add button
 		        	btnAddItem.setDisable(false);
@@ -231,6 +231,19 @@ public class View extends Application {
 		        	btnAddItem.setDisable(true);
 		        }
 		    }
+		});
+		optionsList.focusedProperty().addListener(new ChangeListener<Boolean>() {
+			
+			public void changed(ObservableValue<? extends Boolean> obs, Boolean oldVal, Boolean newVal) 
+			{
+			    if (newVal && (optionsList.selectionModelProperty().getValue().getSelectedItem() != null)) {
+			    	btnAddItem.setDisable(false);
+			    }
+			    else if (!btnAddItem.isFocused())
+			    {
+			    	btnAddItem.setDisable(true);
+			    }
+			}
 		});
 		btnAddItem.setOnAction(
 				new EventHandler<ActionEvent>()
@@ -248,12 +261,11 @@ public class View extends Application {
 		btnRemoveItem.setTooltip(new Tooltip("Remove selected item from meal list"));
 		btnRemoveItem.setDisable(true);
 		btnRemoveItem.setMaxWidth(Double.MAX_VALUE);
-		meal.focusedProperty().addListener(new ChangeListener<Boolean>()
-		{
+		meal.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<FoodItem>() {
 		    @Override
-		    public void changed(ObservableValue<? extends Boolean> arg0, Boolean hadFocus, Boolean hasFocus)
+		    public void changed(ObservableValue<? extends FoodItem> observable, FoodItem oldVal, FoodItem newVal)
 		    {
-		        if (hasFocus)
+		        if (meal.isFocused() && (newVal != null))
 		        {
 		        	// if options list has focus, enable the Add button
 		        	btnRemoveItem.setDisable(false);
@@ -264,6 +276,19 @@ public class View extends Application {
 		        	btnRemoveItem.setDisable(true);
 		        }
 		    }
+		});
+		meal.focusedProperty().addListener(new ChangeListener<Boolean>() {
+			
+			public void changed(ObservableValue<? extends Boolean> obs, Boolean oldVal, Boolean newVal) 
+			{
+			    if (newVal && (meal.selectionModelProperty().getValue().getSelectedItem() != null)) {
+			    	btnRemoveItem.setDisable(false);
+			    }
+			    else if (!btnRemoveItem.isFocused())
+			    {
+			    	btnRemoveItem.setDisable(true);
+			    }
+			}
 		});
 		btnRemoveItem.setOnAction(
 				new EventHandler<ActionEvent>()
