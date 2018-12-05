@@ -1,5 +1,6 @@
 GridPane {
-	-fx-padding: 5px;
+	-fx-padding: 40px;
+	-fx-background-color: rgb(240, 240, 240);
 }
 HBox {
 	-fx-padding: 5px;
@@ -9,20 +10,78 @@ VBox {
 	-fx-padding: 5px;
 }
 
+Label {
+	-fx-text-fill: rgb(57, 59, 61);
+	-fx-font-weight: bold;
+}
+
 Button {
-	-fx-padding: 6px;
+	-fx-padding: 3px;
     -fx-border-insets: 4px;
     -fx-background-insets: 4px;
-    -fx-background-radius: 5;
     -fx-text-fill: black;
     -fx-label-padding: 4px;
-    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );
+    -fx-background-color: transparent;
+    -fx-text-fill: rgb(57, 59, 61);
+    -fx-font-weight: bold;
+    -fx-border-color: rgb(57, 59, 61);
+    -fx-border-radius: 2;
+    -fx-border-width:1px;
 }
 
-.section-title {
-	-fx-alignment: top-left;
+ListView {
+	-fx-background-color: transparent;
+	-fx-border-color: rgb(57, 59, 61);
+	-fx-border-radius: 2;
 }
 
-.bottom-align {
-	-fx-alignment: bottom-right;
+.options-list .list-cell:even {
+	-fx-background-color: rgb(240, 240, 240);
+	-fx-text-fill: rgb(57, 59, 61);
+}
+.options-list .list-cell:odd {
+	-fx-background-color: rgb(230, 230, 230);
+	-fx-text-fill: rgb(57, 59, 61);
+}
+
+.options-list .list-cell:filled:selected:focused {
+    -fx-background-color: #6F9FD8; /* Little Boy Blue - https://www.w3schools.com/colors/colors_trends.asp */
+    -fx-text-fill: rgb(240, 240, 240);
+    -fx-font-weight: bold;
+}
+
+.options-list .list-cell:filled:selected {
+	-fx-background-color: #6F9FD8; /* Little Boy Blue - https://www.w3schools.com/colors/colors_trends.asp */
+    -fx-text-fill: rgb(240, 240, 240);
+    -fx-font-weight: bold;
+}
+
+.meal-list .list-cell:even {
+	-fx-background-color: rgb(240, 240, 240);
+	-fx-text-fill: rgb(57, 59, 61);
+}
+.meal-list .list-cell:odd {
+	-fx-background-color: rgb(230, 230, 230);
+	-fx-text-fill: rgb(57, 59, 61);
+}
+
+
+Button:hover {
+    -fx-background-color: #3F69AA; /* Nebulas Blue - https://www.w3schools.com/colors/colors_trends.asp */
+    -fx-text-fill: rgb(240, 240, 240);
+}
+
+Button:pressed {
+    -fx-scale-y: 0.98;
+    -fx-scale-x: 0.98;
+}
+
+.add-button:hover {
+	-fx-background-color: #006E51; /* Lush meadow - https://www.w3schools.com/colors/colors_trends.asp */
+    -fx-text-fill: rgb(240, 240, 240);
+}
+
+.remove-button:hover {
+	-fx-background-color: #9B2335; /* 2007 Chili Pepper - https://www.w3schools.com/colors/colors_trends.asp */
+    -fx-text-fill: rgb(240, 240, 240);
 }

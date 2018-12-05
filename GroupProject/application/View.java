@@ -106,12 +106,16 @@ public class View extends Application {
 		return rtnBox;
 	}
 	
-	// Middle left
+	/**
+	 * Middle left - List of food options
+	 * Use VBox because it supports width fill for children, which is what we need for a ListView
+	 * @return VBox that contains a ListView with all food items
+	 */
 	private VBox GetOptionsListBox()
 	{
 		VBox rtnBox = new VBox();
-		ListView<String> foodList = new ListView<String>();
-		foodList.getItems().addAll(controller.dummyOptions());
+		ListView<String> foodList = controller.GetFoodOptions();	// unfiltered options - currently a dummy hard-coded list
+		foodList.getStyleClass().add("options-list");
 		rtnBox.setMinHeight(middleHeight);
 		rtnBox.setMinWidth(leftWidth);
 		rtnBox.getChildren().add(foodList);
@@ -165,7 +169,8 @@ public class View extends Application {
 	private VBox GetMealList()
 	{
 		VBox rtnBox = new VBox();
-		ListView<String> mealList = new ListView<String>();
+		ListView<String> mealList = controller.GetMeal();
+		mealList.getStyleClass().add("meal-list");
 		rtnBox.setMinHeight(middleHeight);
 		rtnBox.setMinWidth(rightWidth);
 		rtnBox.getChildren().add(mealList);
