@@ -4,7 +4,7 @@ import java.util.HashMap;
 /**
  * This class represents a food item with all its properties.
  * 
- * @author aka
+ * @author Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
  */
 public class FoodItem {
     // The name of the food item.

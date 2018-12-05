@@ -1,3 +1,14 @@
+/**
+ * @author - Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
+ * Styling tips from combination of various sources including
+ *   - https://docs.oracle.com/javafx/2/layout/size_align.htm
+ *   - http://fxexperience.com/2011/12/styling-fx-buttons-with-css/
+ *   - https://docs.oracle.com/javafx/2/api/javafx/scene/doc-files/cssref.html
+ *   - https://stackoverflow.com/questions/43508511/hover-and-pressed-in-javafx
+ *   - https://stackoverflow.com/questions/39214586/how-to-align-a-button-right-in-javafx
+ *   - https://stackoverflow.com/questions/25336796/tooltip-background-with-javafx-css
+ */
+
 GridPane {
 	-fx-padding: 40px;
 	-fx-background-color: rgb(240, 240, 240);
@@ -11,8 +22,19 @@ VBox {
 }
 
 Label {
+<<<<<<< HEAD
 	-fx-text-fill: rgb(57, 59, 61);
 	-fx-font-weight: bold;
+=======
+	-fx-padding: 3px, 3px, 3px, 0px;
+    -fx-border-insets: 4px, 4px, 4px, 0px;
+    -fx-background-insets: 4px, 4px, 4px, 0px;
+    -fx-text-fill: black;
+    -fx-label-padding: 4px, 4px, 4px, 0px;
+    -fx-background-color: transparent;
+    -fx-text-fill: rgb(57, 59, 61);
+    -fx-font-weight: bold;
+>>>>>>> branch 'master' of https://github.com/uwcswhickman/uwcs400
 }
 
 Button {
@@ -29,12 +51,28 @@ Button {
     -fx-border-width:1px;
 }
 
+<<<<<<< HEAD
 ListView {
 	-fx-background-color: transparent;
 	-fx-border-color: rgb(57, 59, 61);
 	-fx-border-radius: 2;
+=======
+TextField {
+	-fx-padding: 3px;
+    -fx-border-insets: 4px;
+    -fx-background-insets: 4px;
+    -fx-text-fill: black;
+    -fx-label-padding: 4px;
+    -fx-background-color: rgb(255, 255, 255);
+    -fx-text-fill: rgb(57, 59, 61);
+    -fx-font-weight: bold;
+    -fx-border-color: rgb(57, 59, 61);
+    -fx-border-radius: 2;
+    -fx-border-width:1px;
+>>>>>>> branch 'master' of https://github.com/uwcswhickman/uwcs400
 }
 
+<<<<<<< HEAD
 .options-list .list-cell:even {
 	-fx-background-color: rgb(240, 240, 240);
 	-fx-text-fill: rgb(57, 59, 61);
@@ -74,6 +112,103 @@ Button:hover {
 Button:pressed {
     -fx-scale-y: 0.98;
     -fx-scale-x: 0.98;
+=======
+ComboBox {
+	-fx-padding: 3px;
+    -fx-border-insets: 4px;
+    -fx-background-insets: 4px;
+    -fx-text-fill: black;
+    -fx-label-padding: 4px;
+    -fx-background-color: transparent;
+    -fx-text-fill: rgb(57, 59, 61);
+    -fx-font-weight: bold;
+    -fx-border-color: rgb(57, 59, 61);
+    -fx-border-radius: 2;
+    -fx-border-width:1px;
+}
+
+ListView {
+	-fx-background-color: transparent;
+	-fx-border-color: rgb(57, 59, 61);
+	-fx-border-radius: 2;
+}
+
+.number-field {
+	-fx-padding: 3px;
+    -fx-border-insets: 4px;
+    -fx-background-insets: 4px;
+    -fx-text-fill: black;
+    -fx-label-padding: 4px;
+    -fx-background-color: rgb(255, 255, 255);
+    -fx-text-fill: rgb(57, 59, 61);
+    -fx-font-weight: bold;
+    -fx-border-color: rgb(57, 59, 61);
+    -fx-border-radius: 2;
+    -fx-border-width:1px;
+}
+
+.selectable-list .list-cell:even {
+	-fx-background-color: rgb(240, 240, 240);
+	-fx-text-fill: rgb(57, 59, 61);
+}
+.selectable-list .list-cell:odd {
+	-fx-background-color: rgb(230, 230, 230);
+	-fx-text-fill: rgb(57, 59, 61);
+}
+
+.selectable-list:focused .list-cell:filled:selected {
+    -fx-background-color: #6F9FD8; /* Little Boy Blue - https://www.w3schools.com/colors/colors_trends.asp */
+    -fx-text-fill: rgb(240, 240, 240);
+    -fx-font-weight: bold;
+}
+
+.selectable-list .list-cell:filled:selected {
+	-fx-background-color: #9BBCE4; /* lighter version of Little Boy Blue - https://www.w3schools.com/colors/colors_trends.asp */
+    -fx-text-fill: rgb(240, 240, 240);
+    -fx-font-weight: bold;
+}
+
+.no-op-list .list-cell:even {
+	-fx-background-color: rgb(240, 240, 240);
+	-fx-text-fill: rgb(57, 59, 61);
+}
+.no-op-list .list-cell:odd {
+	-fx-background-color: rgb(230, 230, 230);
+	-fx-text-fill: rgb(57, 59, 61);
+}
+
+.no-op-list:focused .list-cell:filled:selected {
+    -fx-background-color: #6F9FD8; /* Little Boy Blue - https://www.w3schools.com/colors/colors_trends.asp */
+    -fx-text-fill: rgb(240, 240, 240);
+    -fx-font-weight: bold;
+}
+
+.no-op-list .list-cell:filled:selected {
+	-fx-background-color: #9BBCE4; /* lighter version of Little Boy Blue - https://www.w3schools.com/colors/colors_trends.asp */
+    -fx-text-fill: rgb(240, 240, 240);
+    -fx-font-weight: bold;
+}
+
+Button:hover {
+    -fx-background-color: #3F69AA; /* Nebulas Blue - https://www.w3schools.com/colors/colors_trends.asp */
+    -fx-text-fill: rgb(240, 240, 240);
+}
+
+Button:pressed {
+    -fx-scale-y: 0.98;
+    -fx-scale-x: 0.98;
+}
+
+.tooltip {
+    -fx-background: rgba(240,240,240);
+    -fx-text-fill: rgb(57, 59, 61);
+    -fx-background-color: rgba(240,240,240);
+    -fx-background-radius: 3px;
+    -fx-background-insets: 0;
+    -fx-padding: 0.667em 0.75em 0.667em 0.75em; /* 10px */
+    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.5) , 10, 0.0 , 0 , 3 );
+    -fx-font-size: 0.85em;
+>>>>>>> branch 'master' of https://github.com/uwcswhickman/uwcs400
 }
 
 .add-button:hover {
