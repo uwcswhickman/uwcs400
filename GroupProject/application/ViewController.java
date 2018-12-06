@@ -8,21 +8,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.TreeMap;
 
-<<<<<<< HEAD
-import javafx.scene.control.ListView;
-
-/**
- * 
- * Resources
- *   Observable list implementation learned from https://rterp.wordpress.com/2015/09/21/binding-a-list-of-strings-to-a-javafx-listview
- *   Styling from combination of various sources including
- *   - https://docs.oracle.com/javafx/2/layout/size_align.htm
- *   - http://fxexperience.com/2011/12/styling-fx-buttons-with-css/
- *   - https://docs.oracle.com/javafx/2/api/javafx/scene/doc-files/cssref.html
- *   - https://stackoverflow.com/questions/43508511/hover-and-pressed-in-javafx
- *   - 
- * @author whickman
-=======
 import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 import javafx.beans.property.SimpleListProperty;
@@ -41,7 +26,6 @@ import javafx.scene.control.ListView;
  *   - https://docs.oracle.com/javafx/2/api/javafx/scene/doc-files/cssref.html
  *   - https://stackoverflow.com/questions/43508511/hover-and-pressed-in-javafx
  * @author Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
->>>>>>> branch 'master' of https://github.com/uwcswhickman/uwcs400
  *
  */
 public class ViewController {
@@ -67,6 +51,7 @@ public class ViewController {
 		// initialize idIndex from our data
 		// instantiate other fields with empty objects
 		this.sessionData = new FoodData();
+		this.sessionData.loadFoodItems(Constants.InitialDataPath);
 		this.rng = new Random();
 		this.idIndex = new HashSet<String>();
 		// food options list initial setup
@@ -129,20 +114,15 @@ public class ViewController {
 		throw new FileNotFoundException("Not yet implemented.");
 	}
 	
-	// Meal methods
-<<<<<<< HEAD
-	public ListView<String> GetMeal()
-=======
-	public ListView<FoodItem> GetMeal()
->>>>>>> branch 'master' of https://github.com/uwcswhickman/uwcs400
+	public String NumItemsLabelMsg()
 	{
-<<<<<<< HEAD
-		ListView<String> rtnLV = new ListView<String>();
-		rtnLV.getItems().addAll("Giant_CheddarCheeseTwiceBakedPotatoes", "Spartan_ShreddedMozzarellaCheese", "Detour_EnergyBarChocolatePeanutButter");
-		return rtnLV;
-=======
+		return this.sessionData.getAllFoodItems().size() + " items loaded";
+	}
+	
+	// Meal methods
+	public ListView<FoodItem> GetMeal()
+	{
 		return this.mealLV;
->>>>>>> branch 'master' of https://github.com/uwcswhickman/uwcs400
 	}
 	
 	public void AddToMeal(FoodItem toAdd)
@@ -225,8 +205,6 @@ public class ViewController {
 		this.attributeRules.clear();
 	}
 	
-<<<<<<< HEAD
-=======
 	public void ApplyFilters()
 	{
 		this.foodOptionsProperty.clear();
@@ -267,28 +245,10 @@ public class ViewController {
 		}
 	}
 	
->>>>>>> branch 'master' of https://github.com/uwcswhickman/uwcs400
 	// Options methods
-<<<<<<< HEAD
-	public ListView<String> GetFoodOptions()
-	{
-		ListView<String> rtnLV = new ListView<String>();
-		rtnLV.getItems().addAll(this.dummyOptions());
-		return rtnLV;
-//		GetFoodOptions("", null); // for real implementation, we should run regular method with no inputs, which will give the full list 
-	}
-	
-	public ListView<String> GetFoodOptions(String nameContains, List<String> rules)
-=======
 	public ListView<FoodItem> GetFoodOptionsListView()
->>>>>>> branch 'master' of https://github.com/uwcswhickman/uwcs400
 	{
-<<<<<<< HEAD
-		// get filtered by name and get filtered by nutrient, then probably take the smaller one and use use retainAll to find intersection to return
-		return new ListView<String>();
-=======
 		return foodOptionsLV; 
->>>>>>> branch 'master' of https://github.com/uwcswhickman/uwcs400
 	}
 	
 	//https://www.programiz.com/java-programming/examples/string-empty-null

@@ -152,17 +152,17 @@ public class View extends Application {
 	private VBox GetOptionsListBox()
 	{
 		VBox rtnBox = new VBox();
-<<<<<<< HEAD
-		ListView<String> foodList = controller.GetFoodOptions();	// unfiltered options - currently a dummy hard-coded list
-		foodList.getStyleClass().add("options-list");
-=======
 		ListView<FoodItem> foodList = controller.GetFoodOptionsListView();	// unfiltered options - currently a dummy hard-coded list
 		foodList.getStyleClass().add("selectable-list");
 		this.optionsList = foodList;
->>>>>>> branch 'master' of https://github.com/uwcswhickman/uwcs400
 		rtnBox.setMinHeight(middleHeight);
 		rtnBox.setMinWidth(leftWidth);
-		rtnBox.getChildren().addAll(foodList);
+		HBox labelBox = new HBox();
+		Pane spacer = new Pane();
+	    HBox.setHgrow(spacer, Priority.ALWAYS);
+		Label lblNumItems = new Label(controller.NumItemsLabelMsg());
+		labelBox.getChildren().addAll(spacer, lblNumItems);
+		rtnBox.getChildren().addAll(foodList, labelBox);
 		rtnBox.setFillWidth(true);
 		return rtnBox;
 	}
@@ -327,14 +327,9 @@ public class View extends Application {
 	private VBox GetMealList()
 	{
 		VBox rtnBox = new VBox();
-<<<<<<< HEAD
-		ListView<String> mealList = controller.GetMeal();
-		mealList.getStyleClass().add("meal-list");
-=======
 		ListView<FoodItem> mealList = controller.GetMeal();
 		mealList.getStyleClass().add("selectable-list");
 		this.meal = mealList;
->>>>>>> branch 'master' of https://github.com/uwcswhickman/uwcs400
 		rtnBox.setMinHeight(middleHeight);
 		rtnBox.setMinWidth(rightWidth);
 		rtnBox.getChildren().add(mealList);

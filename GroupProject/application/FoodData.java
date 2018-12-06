@@ -29,19 +29,49 @@ public class FoodData implements FoodDataADT<FoodItem> {
     
     // Map of nutrients and their corresponding index
     private HashMap<String, BPTree<Double, FoodItem>> indexes;
+    
+    private int toLoad;
+    
+    // ToDo: Remove before submitting!
+    public void SetNumToLoad(int toLoad)
+    {
+    	this.toLoad = toLoad;
+    }
+    
+    public String printNutrientIdx(String nutrient)
+    {
+    	return this.indexes.get(nutrient).toString();
+    }
         
     /**
      * Public constructor
      */
-    public FoodData() {
-        this.foodItemList = new LinkedList<FoodItem>();
+    public FoodData() 
+    {
+    	this.foodItemList = new LinkedList<FoodItem>();
         this.foodItemLookup = new HashSet<FoodItem>();
         this.indexes = new HashMap<String, BPTree<Double, FoodItem>>();
         for (Constants.Nutrient nxt: Constants.Nutrient.values())
         {
         	this.indexes.put(nxt.toString(), new BPTree<Double, FoodItem>(3));
         }
-        this.loadFoodItems(Constants.InitialDataPath);
+        //this.loadFoodItems(Constants.InitialDataPath);
+    }
+    
+    /**
+     * ToDo: Delete before submitting
+     * @param branchingFactor
+     */
+    public FoodData(int branchingFactor) 
+    {
+    	this.foodItemList = new LinkedList<FoodItem>();
+        this.foodItemLookup = new HashSet<FoodItem>();
+        this.indexes = new HashMap<String, BPTree<Double, FoodItem>>();
+        for (Constants.Nutrient nxt: Constants.Nutrient.values())
+        {
+        	this.indexes.put(nxt.toString(), new BPTree<Double, FoodItem>(branchingFactor));
+        }
+        //this.loadFoodItems(Constants.InitialDataPath);
     }
     
     
@@ -95,7 +125,10 @@ public class FoodData implements FoodDataADT<FoodItem> {
      */
     private List<String> loadFromFile(String filePath) throws FileNotFoundException
     {
-    	int numToLoad = 1000;
+    	if (this.toLoad == 0)
+    	{
+    		this.toLoad = 1000;
+    	}
     	
     	List<String> rtnList = new LinkedList<String>();
     	
@@ -105,7 +138,8 @@ public class FoodData implements FoodDataADT<FoodItem> {
         {
 			Scanner inFile = new Scanner(file);
 			
-            while (inFile.hasNextLine() && rtnList.size() <= numToLoad)
+			// ToDo: Remove toLoad check before submitting
+            while (inFile.hasNextLine() && rtnList.size() <= this.toLoad)
             {
                 rtnList.add(inFile.nextLine());
             }
@@ -232,6 +266,10 @@ public class FoodData implements FoodDataADT<FoodItem> {
         	double amt = foodItem.getNutrientValue(nutrient);
         	BPTree<Double, FoodItem> idx = this.indexes.get(nutrient);
         	idx.insert(amt, foodItem);
+        	if (nutrient.contentEquals("carbohydrate"))
+        	{
+        		System.out.println(idx.toString());
+        	}
         }
     }
 

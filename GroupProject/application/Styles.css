@@ -22,10 +22,6 @@ VBox {
 }
 
 Label {
-<<<<<<< HEAD
-	-fx-text-fill: rgb(57, 59, 61);
-	-fx-font-weight: bold;
-=======
 	-fx-padding: 3px, 3px, 3px, 0px;
     -fx-border-insets: 4px, 4px, 4px, 0px;
     -fx-background-insets: 4px, 4px, 4px, 0px;
@@ -34,7 +30,6 @@ Label {
     -fx-background-color: transparent;
     -fx-text-fill: rgb(57, 59, 61);
     -fx-font-weight: bold;
->>>>>>> branch 'master' of https://github.com/uwcswhickman/uwcs400
 }
 
 Button {
@@ -51,12 +46,6 @@ Button {
     -fx-border-width:1px;
 }
 
-<<<<<<< HEAD
-ListView {
-	-fx-background-color: transparent;
-	-fx-border-color: rgb(57, 59, 61);
-	-fx-border-radius: 2;
-=======
 TextField {
 	-fx-padding: 3px;
     -fx-border-insets: 4px;
@@ -69,50 +58,8 @@ TextField {
     -fx-border-color: rgb(57, 59, 61);
     -fx-border-radius: 2;
     -fx-border-width:1px;
->>>>>>> branch 'master' of https://github.com/uwcswhickman/uwcs400
 }
 
-<<<<<<< HEAD
-.options-list .list-cell:even {
-	-fx-background-color: rgb(240, 240, 240);
-	-fx-text-fill: rgb(57, 59, 61);
-}
-.options-list .list-cell:odd {
-	-fx-background-color: rgb(230, 230, 230);
-	-fx-text-fill: rgb(57, 59, 61);
-}
-
-.options-list .list-cell:filled:selected:focused {
-    -fx-background-color: #6F9FD8; /* Little Boy Blue - https://www.w3schools.com/colors/colors_trends.asp */
-    -fx-text-fill: rgb(240, 240, 240);
-    -fx-font-weight: bold;
-}
-
-.options-list .list-cell:filled:selected {
-	-fx-background-color: #6F9FD8; /* Little Boy Blue - https://www.w3schools.com/colors/colors_trends.asp */
-    -fx-text-fill: rgb(240, 240, 240);
-    -fx-font-weight: bold;
-}
-
-.meal-list .list-cell:even {
-	-fx-background-color: rgb(240, 240, 240);
-	-fx-text-fill: rgb(57, 59, 61);
-}
-.meal-list .list-cell:odd {
-	-fx-background-color: rgb(230, 230, 230);
-	-fx-text-fill: rgb(57, 59, 61);
-}
-
-
-Button:hover {
-    -fx-background-color: #3F69AA; /* Nebulas Blue - https://www.w3schools.com/colors/colors_trends.asp */
-    -fx-text-fill: rgb(240, 240, 240);
-}
-
-Button:pressed {
-    -fx-scale-y: 0.98;
-    -fx-scale-x: 0.98;
-=======
 ComboBox {
 	-fx-padding: 3px;
     -fx-border-insets: 4px;
@@ -208,7 +155,6 @@ Button:pressed {
     -fx-padding: 0.667em 0.75em 0.667em 0.75em; /* 10px */
     -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.5) , 10, 0.0 , 0 , 3 );
     -fx-font-size: 0.85em;
->>>>>>> branch 'master' of https://github.com/uwcswhickman/uwcs400
 }
 
 .add-button:hover {
