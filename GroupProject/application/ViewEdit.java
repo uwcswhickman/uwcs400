@@ -46,7 +46,7 @@ import javafx.stage.WindowEvent;
  * @author Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
  *
  */
-public class View extends Application {
+public class ViewEdit extends Application {
 	
 	// to make grid height and width all relative to a single number input so we can easily update it with one number
 	private static final double smallSectionRatio = .3; // for columns, the middle is 30% the size of left and right; for rows, the top and bottom are 30% the size of the middle row

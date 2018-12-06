@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.TreeMap;
 
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
-
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.ListCell;
@@ -44,7 +42,7 @@ public class ViewController {
 	private ListView<String> allFiltersLV;
 	private ListView<FoodItem> foodOptionsLV;
 	private ListView<FoodItem> mealLV;
-		
+	
 	public ViewController()
 	{
 		// instantiate sessionData object using foodItems.csv in current directory

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -183,6 +184,10 @@ public class FoodData implements FoodDataADT<FoodItem> {
     			}
     		}
     	}
+    	Collections.sort(this.foodItemList, (left, right) -> 
+    		{ 
+    			return left.getName().compareTo(right.getName()); 
+    		});
     }
     
     /*
