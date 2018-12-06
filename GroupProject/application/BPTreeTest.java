@@ -18,7 +18,8 @@ public class BPTreeTest {
 	private static FoodData largeDataSmallBranch;
 	private static FoodData largeDataLargeBranch;
 	private static List<FoodItem> foodItems;
-	private static int numToLoad = 10;
+	private static int numToLoad = 100000;
+	private static String largeItemListPath = "C:\\WillSource\\CS400\\uwcs400\\GroupProject\\foodItemsLarge.csv";
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -27,10 +28,10 @@ public class BPTreeTest {
 		data.loadFoodItems(Constants.InitialDataPath);
 		largeDataSmallBranch = new FoodData();
 		largeDataSmallBranch.SetNumToLoad(numToLoad);
-		largeDataSmallBranch.loadFoodItems(Constants.InitialDataPath);
+		largeDataSmallBranch.loadFoodItems(largeItemListPath);
 		largeDataLargeBranch = new FoodData(203);
 		largeDataLargeBranch.SetNumToLoad(numToLoad);
-		largeDataLargeBranch.loadFoodItems(Constants.InitialDataPath);
+		largeDataLargeBranch.loadFoodItems(largeItemListPath);
 		foodItems = data.getAllFoodItems();
 	}
 
@@ -134,11 +135,8 @@ public class BPTreeTest {
 			{
 				expected.add(nxt);
 			}
-			
 		}
 		List<FoodItem> actual = testTree.rangeSearch(keeper, "==");
-		
-		System.out.println(testTree.toString());
 		
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++)
@@ -371,7 +369,6 @@ public class BPTreeTest {
 		String rule = "carbohydrate >= 50";
 		List<String> rules = new LinkedList<String>();
 		rules.add(rule);
-		System.out.println(largeDataSmallBranch.printNutrientIdx("carbohydrate"));
 		List<FoodItem> actual = largeDataSmallBranch.filterByNutrients(rules);
 		
 		assertEquals(expected.size(), actual.size());

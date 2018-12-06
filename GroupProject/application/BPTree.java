@@ -81,26 +81,10 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
     		InternalNode newRoot = new InternalNode();
     		Node oldRoot = this.root;
     		Node newSibling = this.root.split();
+    		
+    		K middleKey = oldRoot.getFirstLeafKey();
+			// least child will be the new sibling, and we need to set the old root as our second child (using its first leaf key as the index)
     		newRoot.leastChild = newSibling;
-    		
-    		if (oldRoot.type == NodeType.Internal)
-    		{
-    			@SuppressWarnings("unchecked")
-				InternalNode asInternal = (InternalNode) oldRoot;
-    			Entry<K, Node> firstEntry = asInternal.childMap.firstEntry();
-    			Node newLeastChild = firstEntry.getValue();
-    			asInternal.childMap.remove(firstEntry.getKey());
-    			asInternal.leastChild = newLeastChild;
-    			
-    		}
-    		else
-    		{
-    			newRoot.childMap.put(oldRoot.getFirstKey(), oldRoot);
-    		}
-    		
-    		K middleKey = oldRoot.getFirstKey();
-			// if child that split was our least child, then we need to make a new least child, etc.
-			newRoot.leastChild = newSibling;
 			newRoot.childMap.put(middleKey, oldRoot);
 			
     		this.root = newRoot;
@@ -315,6 +299,7 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
         
         boolean shouldSplit()
         {
+        	// we should split when # children larger than branching factor, and our child list is the leastChild + all children in the childMap
         	if (this.childMap.keySet().size() + 1 > branchingFactor)
         	{
         		return true;
@@ -359,6 +344,7 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
             	}
         		if (childToUpdate == null)
         		{
+        			// if we got here, then the key is larger than our largest key, so go with the last child
         			childToUpdate = this.childMap.lastEntry().getValue();
         		}
         	}
@@ -367,31 +353,18 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
 			if (childToUpdate.shouldSplit())  // should be == ?
 			{
 				Node sibling = childToUpdate.split();
-				
-				if (childToUpdate.type == NodeType.Internal)
-				{
-					@SuppressWarnings("unchecked")
-					InternalNode asInternal = (InternalNode)childToUpdate;
-					// if it's an index node, then it has one more key than it needs, now that we've split it, so remove it and add it to our list
-					Entry<K, Node> firstEntry = asInternal.childMap.firstEntry();
-					Node newLeastChild = firstEntry.getValue();
-					asInternal.childMap.remove(firstEntry.getKey());
-					asInternal.leastChild = newLeastChild;
-				}
-				else
-				{
-					this.childMap.put(childToUpdate.getFirstKey(), childToUpdate);
-				}
-				K middleKey = childToUpdate.getFirstKey();
+								
+				K newKey = childToUpdate.getFirstLeafKey();
 				// if child that split was our least child, then we need to make a new least child, etc.
 				if (lastKey == null)
 				{
 					this.leastChild = sibling;
-					this.childMap.put(middleKey, childToUpdate);
+					this.childMap.put(newKey, childToUpdate);
 				}
-				// otherwise, that child's already in our map, but the sibling goes at the key the original child was at, and we'll add a new key for the original child
+				// otherwise, the new sibling goes at our old key (lastKey), and our original child goes at a new key
 				else
 				{
+					this.childMap.put(newKey, childToUpdate);
 					this.childMap.put(lastKey, sibling);
 				}
 			}
@@ -402,6 +375,7 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
          * @see BPTree.Node#split()
          */
         Node split() {
+        	
         	InternalNode newSibling = new InternalNode();
         	newSibling.leastChild = this.leastChild;
             for (int i = 0; i < siblingSize - 1; i++)
@@ -410,6 +384,12 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
             	Node nxtChild = this.childMap.remove(nxtKey);
             	newSibling.childMap.put(nxtKey, nxtChild);
             }
+            
+			// We now have one more key than we need and our least child needs to be updated, now that we've split it, so remove it and set our least child to that key's value
+			K firstKey = this.childMap.firstKey();
+			Node newLeastChild = this.childMap.get(firstKey);
+			this.childMap.remove(firstKey);
+			this.leastChild = newLeastChild;
             
             return newSibling;
         }
@@ -430,39 +410,22 @@ public class BPTree<K extends Comparable<K>, V> implements BPTreeADT<K, V> {
         	{
         		K nxtKey = this.childMap.firstKey();
         		
-        		if (key.compareTo(nxtKey) <= 0)
+        		if (key.compareTo(nxtKey) < 0)
         		{
         			return this.leastChild.rangeSearch(key, comparator);
         		}
         		
-        		/*
-        		lastKey = nxtKey;
-        		nxtKey = this.childMap.higherKey(nxtKey);
+        		K lastKey = nxtKey;
         		while (nxtKey != null)
             	{
-        			if (key.compareTo(nxtKey) < 0)
-            		{
-            			childToUpdate = this.childMap.get(lastKey);
-            			break;
-            		}
-        			else
+        			if (key.compareTo(nxtKey) >= 0)
         			{
         				lastKey = nxtKey;
         				nxtKey = this.childMap.higherKey(nxtKey);
         			}
-            	}
-        		if (childToUpdate == null)
-        		{
-        			childToUpdate = this.childMap.lastEntry().getValue();
-        		}
-        		 */
-        		K lastKey = nxtKey;
-        		while (nxtKey != null)
-            	{
-        			if (key.compareTo(nxtKey) > 0)
+        			else
         			{
-        				lastKey = nxtKey;
-        				nxtKey = this.childMap.higherKey(nxtKey);
+        				break;
         			}
             	}
         		return this.childMap.get(lastKey).rangeSearch(key, comparator);

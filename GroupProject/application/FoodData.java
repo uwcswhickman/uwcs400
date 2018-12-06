@@ -126,11 +126,6 @@ public class FoodData implements FoodDataADT<FoodItem> {
      */
     private List<String> loadFromFile(String filePath) throws FileNotFoundException
     {
-    	if (this.toLoad == 0)
-    	{
-    		this.toLoad = 1000;
-    	}
-    	
     	List<String> rtnList = new LinkedList<String>();
     	
     	File file = new File( filePath );
@@ -271,10 +266,6 @@ public class FoodData implements FoodDataADT<FoodItem> {
         	double amt = foodItem.getNutrientValue(nutrient);
         	BPTree<Double, FoodItem> idx = this.indexes.get(nutrient);
         	idx.insert(amt, foodItem);
-        	if (nutrient.contentEquals("carbohydrate"))
-        	{
-        		System.out.println(idx.toString());
-        	}
         }
     }
 
