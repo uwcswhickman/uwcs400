@@ -19,7 +19,7 @@ public class BPTreeTest {
 	private static FoodData largeDataLargeBranch;
 	private static List<FoodItem> foodItems;
 	private static int numToLoad = 100000;
-	private static String largeItemListPath = "C:\\WillSource\\CS400\\uwcs400\\GroupProject\\foodItemsLarge.csv";
+	private static String largeItemListPath = System.getProperty("user.dir") + "/foodItemsLarge.csv";
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -450,5 +450,61 @@ public class BPTreeTest {
 		List<FoodItem> actual = largeDataLargeBranch.filterByNutrients(rules);
 		
 		assertEquals(expected.size(), actual.size());
+	}
+	
+	@Test
+	public void test17InsertManyMultipleRuleFilter() {
+		List<FoodItem> items = largeDataLargeBranch.getAllFoodItems();
+		List<FoodItem> expected = new LinkedList<FoodItem>();
+		double keeper = 0;
+		for (FoodItem nxt: items)
+		{
+			double carbs = nxt.getNutrientValue("carbohydrate");
+			double fat = nxt.getNutrientValue("fat");
+			if (keeper == carbs && keeper == fat)
+			{
+				expected.add(nxt);
+			}
+		}
+		String rule = "carbohydrate == 0";
+		String rule2 = "fat == 0";
+		List<String> rules = new LinkedList<String>();
+		rules.add(rule);
+		rules.add(rule2);
+		List<FoodItem> actual = largeDataLargeBranch.filterByNutrients(rules);
+		
+		assertEquals(expected.size(), actual.size());
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void test18IllegalBranchingFactor() {
+		BPTreeADT<Double, FoodItem> testTree = new BPTree<Double, FoodItem>(1);
+	}
+	
+	@Test
+	public void test19nullKeyRangeSearchReturnsEmpty() {
+		BPTreeADT<Double, FoodItem> testTree = new BPTree<Double, FoodItem>(3);
+		testTree.insert(10d, foodItems.get(0));
+		List<FoodItem> emptySearch = testTree.rangeSearch(null, "==");
+		assertTrue(emptySearch.isEmpty());
+	}
+	
+	@Test
+	public void test20nullComparatorRangeSearchReturnsEmpty() {
+		BPTreeADT<Double, FoodItem> testTree = new BPTree<Double, FoodItem>(3);
+		testTree.insert(10d, foodItems.get(0));
+		List<FoodItem> emptySearch = testTree.rangeSearch(10d, null);
+		assertTrue(emptySearch.isEmpty());
+	}
+	
+	@Test
+	public void test21allowDuplicateKeysKeepValue() {
+		BPTreeADT<Double, FoodItem> testTree = new BPTree<Double, FoodItem>(3);
+		testTree.insert(10d, foodItems.get(0));
+		testTree.insert(10d, foodItems.get(1));
+		FoodItem expected = foodItems.get(0);
+		FoodItem actual = testTree.rangeSearch(10d, "==").get(0);
+		
+		assertEquals(expected, actual);
 	}
 }
