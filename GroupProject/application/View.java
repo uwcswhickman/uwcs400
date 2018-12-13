@@ -1,4 +1,6 @@
 package application;
+import java.io.FileNotFoundException;
+
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -6,7 +8,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -14,15 +15,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -130,12 +128,22 @@ public class View extends Application {
 					@Override
 					public void handle(ActionEvent event)
 					{
-						Stage dialog = popupOutline();
+						Stage dialog = GetLoadPopUp();
 						dialog.show();
 					}
 				});
 		Button btnSaveList = newButton("Save List", "btnSaveList", true);
 		btnSaveList.setTooltip(new Tooltip("Save current options list to a file in alphabetical order"));
+		btnSaveList.setOnAction(
+				new EventHandler<ActionEvent>()
+				{
+					@Override
+					public void handle(ActionEvent event)
+					{
+						Stage dialog = GetSavePopUp();
+						dialog.show();
+					}
+				});
 		rtnBox.setMinHeight(topHeight);
 		rtnBox.setMinWidth(leftWidth);
 		Pane spacer = new Pane();
@@ -152,17 +160,14 @@ public class View extends Application {
 	private VBox GetOptionsListBox()
 	{
 		VBox rtnBox = new VBox();
+
 		ListView<FoodItem> foodList = controller.GetFoodOptionsListView();	// unfiltered options - currently a dummy hard-coded list
 		foodList.getStyleClass().add("selectable-list");
 		this.optionsList = foodList;
+
 		rtnBox.setMinHeight(middleHeight);
 		rtnBox.setMinWidth(leftWidth);
-		HBox labelBox = new HBox();
-		Pane spacer = new Pane();
-	    HBox.setHgrow(spacer, Priority.ALWAYS);
-		Label lblNumItems = new Label(controller.NumItemsLabelMsg());
-		labelBox.getChildren().addAll(spacer, lblNumItems);
-		rtnBox.getChildren().addAll(foodList, labelBox);
+		rtnBox.getChildren().addAll(foodList);
 		rtnBox.setFillWidth(true);
 		return rtnBox;
 	}
@@ -177,6 +182,16 @@ public class View extends Application {
 		
 		Button btnNewItem = newButton("Add New Item", "btnNewItem", true);
 		btnNewItem.setTooltip(new Tooltip("Add a custom food item to the options list"));
+		btnNewItem.setOnAction(
+				new EventHandler<ActionEvent>()
+				{
+					@Override
+					public void handle(ActionEvent event)
+					{
+						Stage dialog = GetNewItemPopUp();
+						dialog.show();
+					}
+				});
 		
 		Button btnFilters = newButton("Filters", "btnFilters", true);
 		btnFilters.setTooltip(new Tooltip("Apply filters to narrow down the options list"));
@@ -327,6 +342,7 @@ public class View extends Application {
 	private VBox GetMealList()
 	{
 		VBox rtnBox = new VBox();
+
 		ListView<FoodItem> mealList = controller.GetMeal();
 		mealList.getStyleClass().add("selectable-list");
 		this.meal = mealList;
@@ -344,6 +360,16 @@ public class View extends Application {
 		rtnBox.setMinWidth(rightWidth);
 		Button btnAnalyze = newButton("Analyze", "btnAnalyze", true);
 		btnAnalyze.setTooltip(new Tooltip("Analyze nutrient totals from the current meal"));
+		btnAnalyze.setOnAction(
+				new EventHandler<ActionEvent>()
+				{
+					@Override
+					public void handle(ActionEvent event)
+					{
+						Stage dialog = GetAnalysisPopUp();
+						dialog.show();
+					}
+				});
 		Pane spacer = new Pane();
 	    HBox.setHgrow(spacer, Priority.ALWAYS);
 		rtnBox.getChildren().addAll(spacer, btnAnalyze);
@@ -488,6 +514,202 @@ public class View extends Application {
 		return filters;
 	}
 	
+	private Stage GetLoadPopUp()
+	{
+		Stage loadList = new Stage();
+		
+		VBox root = new VBox();
+		Scene loadScene = new Scene(root);
+		loadScene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
+		loadList.setScene(loadScene);
+		
+		// header text
+		HBox row1 = new HBox();
+		Label fileName = new Label("Load data from file:");
+		row1.getChildren().add(fileName);
+		root.getChildren().add(row1);
+				
+		// file entry
+		HBox row2 = new HBox();
+		TextField fileField = new TextField();
+		fileField.setMaxHeight(45);
+		Button btnLoadFile = newButton("Load", "btnLoadFile", false);
+		btnLoadFile.setOnAction(
+				new EventHandler<ActionEvent>()
+				{
+					@Override
+					public void handle(ActionEvent event)
+					{
+						try {
+							controller.TryLoad(fileField.getText());
+						} catch (FileNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				});
+		
+		row2.getChildren().addAll(fileField, btnLoadFile);
+		root.getChildren().add(row2);
+		return loadList;
+	}
+	
+	private Stage GetSavePopUp()
+	{
+		Stage saveList = new Stage();
+		
+		VBox root = new VBox();
+		Scene saveScene = new Scene(root);
+		saveScene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
+		saveList.setScene(saveScene);
+		
+		// header text
+		HBox row1 = new HBox();
+		Label fileName = new Label("Filepath:");
+		row1.getChildren().add(fileName);
+		root.getChildren().add(row1);
+				
+		// file entry
+		HBox row2 = new HBox();
+		TextField fileField = new TextField();
+		fileField.setMaxHeight(45);
+		Button btnSaveFile = newButton("Save", "btnSaveFile", false);
+		btnSaveFile.setOnAction(
+				new EventHandler<ActionEvent>()
+				{
+					@Override
+					public void handle(ActionEvent event)
+					{
+						try {
+							controller.TrySave(fileField.getText());
+						} catch (FileNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				});
+		
+		row2.getChildren().addAll(fileField, btnSaveFile);
+		root.getChildren().add(row2);
+		return saveList;
+	}
+	
+	private Stage GetNewItemPopUp()
+	{
+		Stage newItem = new Stage();
+		
+		VBox root = new VBox();
+		Scene newItemScene = new Scene(root);
+		newItemScene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
+		newItem.setScene(newItemScene);
+		
+		// header text
+		HBox row1 = new HBox();
+		Label fileName = new Label("Add new item:");
+		row1.getChildren().add(fileName);
+		root.getChildren().add(row1);
+				
+		// item name field
+		HBox row2 = new HBox();
+		Label itemName = new Label("Name: ");
+		TextField itemField = new TextField();
+		itemField.setMaxHeight(45);
+		row2.getChildren().addAll(itemName,itemField);
+		root.getChildren().add(row2);
+		
+		// item calories, fat, carbs
+		HBox row3 = new HBox();
+		Label itemCals = new Label("Calories: ");
+		TextField itemCalsField = new TextField();
+		itemCalsField.setMaxHeight(45);
+		Label itemFat = new Label("Fat: ");
+		TextField itemFatField = new TextField();
+		itemFatField.setMaxHeight(45);
+		Label itemCarbs = new Label("Carbs: ");
+		TextField itemCarbsField = new TextField();
+		itemCarbsField.setMaxHeight(45);
+		row3.getChildren().addAll(itemCals,itemCalsField,itemFat,itemFatField,itemCarbs,itemCarbsField);
+		root.getChildren().add(row3);
+		
+		// item protein, fiber, Add button
+		HBox row4 = new HBox();
+		Label itemProtein = new Label("Protein: ");
+		TextField itemProteinField = new TextField();
+		itemProteinField.setMaxHeight(45);
+		Label itemFiber = new Label("Fiber: ");
+		TextField itemFiberField = new TextField();
+		itemFiberField.setMaxHeight(45);
+		Button btnAdd = newButton("Add", "btnAdd", false);
+		btnAdd.setOnAction(
+				new EventHandler<ActionEvent>()
+				{
+					@Override
+					public void handle(ActionEvent event)
+					{
+						// TODO: add event
+					}
+				});
+		
+		row4.getChildren().addAll(itemProtein,itemProteinField,itemFiber,itemFiberField,btnAdd);
+		root.getChildren().add(row4);
+		
+		return newItem;
+	}
+	
+	private Stage GetAnalysisPopUp()
+	{
+		Stage analysis = new Stage();
+		
+		VBox root = new VBox();
+		Scene analysisScene = new Scene(root);
+		analysisScene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
+		analysis.setScene(analysisScene);
+		
+		// header text
+		HBox row1 = new HBox();
+		Label fileName = new Label("Meal Analysis");
+		row1.getChildren().add(fileName);
+		root.getChildren().add(row1);
+				
+		// nutrient fields
+		HBox row2 = new HBox();
+		Label cals = new Label("Calories: ");
+		TextField calsField = new TextField();
+		calsField.setMaxHeight(45);
+		row2.getChildren().addAll(cals,calsField);
+		root.getChildren().add(row2);
+		
+		HBox row3 = new HBox();
+		Label fat = new Label("Fat: ");
+		TextField fatField = new TextField();
+		calsField.setMaxHeight(45);
+		row3.getChildren().addAll(fat,fatField);
+		root.getChildren().add(row3);
+		
+		HBox row4 = new HBox();
+		Label carbs = new Label("Carbs: ");
+		TextField carbsField = new TextField();
+		carbsField.setMaxHeight(45);
+		row4.getChildren().addAll(carbs,carbsField);
+		root.getChildren().add(row4);
+		
+		HBox row5 = new HBox();
+		Label protein = new Label("Protein: ");
+		TextField proteinField = new TextField();
+		proteinField.setMaxHeight(45);
+		row5.getChildren().addAll(protein,proteinField);
+		root.getChildren().add(row5);
+		
+		HBox row6 = new HBox();
+		Label fiber = new Label("Fiber: ");
+		TextField fiberField = new TextField();
+		fiberField.setMaxHeight(45);
+		row6.getChildren().addAll(fiber,fiberField);
+		root.getChildren().add(row6);
+		
+		return analysis;
+		
+	}
 	/**
 	 * Outline for a pop-up. See the btnFilters declaration in GetAddRemoveItems for 
 	 * an example of how to use this tag to launch your pop-up
