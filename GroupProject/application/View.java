@@ -88,8 +88,8 @@ public class View extends Application {
 			parent.add(GetMealLabel(), 2, 0);
 			// middle right - scrollable meal list
 			parent.add(GetMealList(), 2, 1);
-			// bottom right - analyze button
-			parent.add(GetMealAnalyzeButton(), 2, 2);
+			// bottom right - analyze button and Clear Button
+			parent.add(GetMealAnalyzeClearButton(), 2, 2);
 			// middle center - Add/remove items from meal list - must initialize after GetOptionsListBox and GetMealList so that those two ListViews are already initialized
 			parent.add(GetAddRemoveButtons(this.optionsList, this.meal), 1, 1);
 			
@@ -287,12 +287,12 @@ public class View extends Application {
 		    {
 		        if (meal.isFocused() && (newVal != null))
 		        {
-		        	// if options list has focus, enable the Add button
+		        	// if meal list has focus, enable the remove button
 		        	btnRemoveItem.setDisable(false);
 		        }
 		        else if (!btnRemoveItem.isFocused())
 		        {
-		        	// if it doesn't have focus and the user clicked anything OTHER than the Add button, then disable the Add button
+		        	// if it doesn't have focus and the user clicked anything OTHER than the Add button, then disable the remove button
 		        	btnRemoveItem.setDisable(true);
 		        }
 		    }
@@ -353,7 +353,7 @@ public class View extends Application {
 		return rtnBox;
 	}
 	
-	private HBox GetMealAnalyzeButton()
+	private HBox GetMealAnalyzeClearButton()
 	{
 		HBox rtnBox = new HBox();
 		rtnBox.setMinHeight(bottomHeight);
@@ -370,9 +370,57 @@ public class View extends Application {
 						dialog.show();
 					}
 				});
+		//Clear Button for meal list
+		Button btnClear = newButton("Clear", "btnClear", true);
+		btnClear.setTooltip(new Tooltip("Clear items from meal list"));
+		meal.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<FoodItem>() {
+		    @Override
+		    public void changed(ObservableValue<? extends FoodItem> observable, FoodItem oldVal, FoodItem newVal)
+		    {
+		        if (meal.isFocused() && (newVal != null))
+		        {
+		        	// if meal list has focus, enable the clear button
+		        	btnClear.setDisable(false);
+		        }
+		        else if (!btnClear.isFocused())
+		        {
+		        	// if it doesn't have focus, disable the clear button
+		        	btnClear.setDisable(true);
+		        }
+		    }
+		});
+		meal.focusedProperty().addListener(new ChangeListener<Boolean>() {
+			
+			public void changed(ObservableValue<? extends Boolean> obs, Boolean oldVal, Boolean newVal) 
+			{
+			    if (newVal && (meal.selectionModelProperty().getValue().getSelectedItem() != null)) {
+			    	btnClear.setDisable(false);
+			    }
+			    else if (!btnClear.isFocused())
+			    {
+			    	btnClear.setDisable(true);
+			    }
+			}
+		});
+		btnClear.setOnAction(
+				new EventHandler<ActionEvent>()
+				{
+					@Override
+					public void handle(ActionEvent event)
+					{
+						
+//						FoodItem selected = meal.getSelectionModel().selectedItemProperty().getValue();
+//						while (selected != null)
+//							controller.RemoveFromMeal(selected);
+						
+						meal.getItems().clear();
+						
+							btnClear.setDisable(true); // disable the clear button after clicked. 
+					}
+				});
 		Pane spacer = new Pane();
 	    HBox.setHgrow(spacer, Priority.ALWAYS);
-		rtnBox.getChildren().addAll(spacer, btnAnalyze);
+		rtnBox.getChildren().addAll(spacer, btnClear, btnAnalyze);
 		return rtnBox;
 	}
 	
@@ -611,7 +659,7 @@ public class View extends Application {
 				
 		// item name field
 		HBox row2 = new HBox();
-		Label itemName = new Label("Name: ");
+		Label itemName = new Label("Name:     ");
 		TextField itemField = new TextField();
 		itemField.setMaxHeight(45);
 		row2.getChildren().addAll(itemName,itemField);
@@ -619,13 +667,13 @@ public class View extends Application {
 		
 		// item calories, fat, carbs
 		HBox row3 = new HBox();
-		Label itemCals = new Label("Calories: ");
+		Label itemCals = new Label("Calories:  ");
 		TextField itemCalsField = new TextField();
 		itemCalsField.setMaxHeight(45);
-		Label itemFat = new Label("Fat: ");
+		Label itemFat = new Label("Fat:       ");
 		TextField itemFatField = new TextField();
 		itemFatField.setMaxHeight(45);
-		Label itemCarbs = new Label("Carbs: ");
+		Label itemCarbs = new Label("Carbs:    ");
 		TextField itemCarbsField = new TextField();
 		itemCarbsField.setMaxHeight(45);
 		row3.getChildren().addAll(itemCals,itemCalsField,itemFat,itemFatField,itemCarbs,itemCarbsField);
@@ -633,10 +681,10 @@ public class View extends Application {
 		
 		// item protein, fiber, Add button
 		HBox row4 = new HBox();
-		Label itemProtein = new Label("Protein: ");
+		Label itemProtein = new Label("Protein:   ");
 		TextField itemProteinField = new TextField();
 		itemProteinField.setMaxHeight(45);
-		Label itemFiber = new Label("Fiber: ");
+		Label itemFiber = new Label("Fiber:    ");
 		TextField itemFiberField = new TextField();
 		itemFiberField.setMaxHeight(45);
 		Button btnAdd = newButton("Add", "btnAdd", false);
@@ -665,6 +713,7 @@ public class View extends Application {
 		analysisScene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
 		analysis.setScene(analysisScene);
 		
+		
 		// header text
 		HBox row1 = new HBox();
 		Label fileName = new Label("Meal Analysis");
@@ -676,35 +725,35 @@ public class View extends Application {
 		Label cals = new Label("Calories: ");
 		TextField calsField = new TextField();
 		calsField.setMaxHeight(45);
-		row2.getChildren().addAll(cals,calsField);
+		row2.getChildren().addAll(cals, calsField);
 		root.getChildren().add(row2);
 		
 		HBox row3 = new HBox();
-		Label fat = new Label("Fat: ");
+		Label fat = new Label("Fat:         ");
 		TextField fatField = new TextField();
 		calsField.setMaxHeight(45);
-		row3.getChildren().addAll(fat,fatField);
+		row3.getChildren().addAll(fat, fatField);
 		root.getChildren().add(row3);
 		
 		HBox row4 = new HBox();
-		Label carbs = new Label("Carbs: ");
+		Label carbs = new Label("Carbs:     ");
 		TextField carbsField = new TextField();
 		carbsField.setMaxHeight(45);
-		row4.getChildren().addAll(carbs,carbsField);
+		row4.getChildren().addAll(carbs, carbsField);
 		root.getChildren().add(row4);
 		
 		HBox row5 = new HBox();
-		Label protein = new Label("Protein: ");
+		Label protein = new Label("Protein:  ");
 		TextField proteinField = new TextField();
 		proteinField.setMaxHeight(45);
-		row5.getChildren().addAll(protein,proteinField);
+		row5.getChildren().addAll(protein, proteinField);
 		root.getChildren().add(row5);
 		
 		HBox row6 = new HBox();
-		Label fiber = new Label("Fiber: ");
+		Label fiber = new Label("Fiber:      ");
 		TextField fiberField = new TextField();
 		fiberField.setMaxHeight(45);
-		row6.getChildren().addAll(fiber,fiberField);
+		row6.getChildren().addAll(fiber, fiberField);
 		root.getChildren().add(row6);
 		
 		return analysis;
