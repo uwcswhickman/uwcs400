@@ -31,11 +31,14 @@ public class FoodData implements FoodDataADT<FoodItem> {
     // Map of nutrients and their corresponding index
     private HashMap<String, BPTree<Double, FoodItem>> indexes;
     
+    private boolean limitItemsToLoad = false;
+    
     private int toLoad;
     
     // ToDo: Remove before submitting!
     public void SetNumToLoad(int toLoad)
     {
+    	this.limitItemsToLoad = true;
     	this.toLoad = toLoad;
     }
     
@@ -56,7 +59,6 @@ public class FoodData implements FoodDataADT<FoodItem> {
         {
         	this.indexes.put(nxt.toString(), new BPTree<Double, FoodItem>(3));
         }
-        //this.loadFoodItems(Constants.InitialDataPath);
     }
     
     /**
@@ -72,7 +74,6 @@ public class FoodData implements FoodDataADT<FoodItem> {
         {
         	this.indexes.put(nxt.toString(), new BPTree<Double, FoodItem>(branchingFactor));
         }
-        //this.loadFoodItems(Constants.InitialDataPath);
     }
     
     
@@ -134,12 +135,21 @@ public class FoodData implements FoodDataADT<FoodItem> {
         {
 			Scanner inFile = new Scanner(file);
 			
-			// ToDo: Remove toLoad check before submitting
-            while (inFile.hasNextLine() && rtnList.size() <= this.toLoad)
-            {
-                rtnList.add(inFile.nextLine());
-            }
-            
+			if (this.limitItemsToLoad)
+			{
+	            while (inFile.hasNextLine() && rtnList.size() <= this.toLoad)
+	            {
+	                rtnList.add(inFile.nextLine());
+	            }
+			}
+			else
+			{
+				while (inFile.hasNextLine())
+	            {
+	                rtnList.add(inFile.nextLine());
+	            }
+			}
+			
             inFile.close();
         }
         return rtnList;
