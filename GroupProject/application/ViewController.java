@@ -3,9 +3,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -215,10 +213,7 @@ public class ViewController {
 	
 	public void AddToMeal(FoodItem toAdd)
 	{
-		if (!this.mealListProperty.contains(toAdd))
-		{
-			this.mealListProperty.add(toAdd);
-		}
+		this.mealListProperty.add(toAdd);
 		Collections.sort(this.mealListProperty, (left, right) -> 
 			{ 
 				return left.getName().toLowerCase().compareTo(right.getName().toLowerCase()); 
@@ -402,7 +397,7 @@ public class ViewController {
 	private void SortFoodList()
 	{
 		Collections.sort(this.sessionData.getAllFoodItems(), (left, right) -> 
-		{ 
+		{
 			return left.getName().toLowerCase().compareTo(right.getName().toLowerCase()); 
 		});
 	}

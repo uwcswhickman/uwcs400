@@ -737,7 +737,16 @@ public class View extends Application {
 	{
 		HBox rtnRow = new HBox();
 		rtnRow.getStyleClass().add("thin-hbox");
-		Label rowLabel = new Label(nutrient.toString());
+		String labelText;
+		if (nutrient == Nutrient.carbohydrate)
+		{
+			labelText = "carbohydrates";
+		}
+		else
+		{
+			labelText = nutrient.toString();
+		}
+		Label rowLabel = new Label(labelText);
 		Pane spacer = new Pane();
 	    HBox.setHgrow(spacer, Priority.ALWAYS);
 		TextField rowField = getNumberOnlyTextField(initialVal);
