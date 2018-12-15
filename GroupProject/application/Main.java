@@ -57,10 +57,14 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 /**
- * JavaFX UI class 
+ * JavaFX user interaction class that implements all user-facing elements
+ * of the meal analysis app
+ * 
+ * Loads from initial file on startup, allows user to select another data source,
+ * save their current food options list, add/remove items from a meal list, filter 
+ * their options using rules and searches, and analyze their current meal selection
  *   
  * @author Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
- *
  */
 public class Main extends Application {
 	
@@ -80,16 +84,23 @@ public class Main extends Application {
 	
 	private static final double minButtonSize = 100;	// basic minimum so that buttons don't look weirdly different all over the place
 	
-	private ViewController controller;
-	private Stage primaryStage;
+	private ViewController controller; // controller instance for wrapping all data manipulation and separating UI from data updates
+	private Stage primaryStage; // reference to the primary stage for access across the class
 	private ListView<FoodItem> optionsList;
 	private ListView<FoodItem> meal;
 	private Label numItemsLoaded;
 	
+	/**
+	 * Entry point for the program. See start method
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		launch(args);
 	}
 	
+	/*
+	 * Initializes application with data and launches primary stage
+	 */
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 	
@@ -142,7 +153,12 @@ public class Main extends Application {
 		
 	}
 	
-	// Top Left
+	/**
+	 * Top left portion of the primary stage. Includes label for food options list, 
+	 * label informing user how many food options are available, & buttons to load/save 
+	 * the options list
+	 * @return HBox with UI elements for the top-left portion of the primary stage
+	 */
 	private HBox GetOptionsLoadSaveBox()
 	{
 		HBox rtnBox = new HBox();
@@ -205,7 +221,11 @@ public class Main extends Application {
 		return rtnBox;
 	}
 	
-	// Bottom left
+	/**
+	 * Bottom left portion of the main stage, with buttons for 
+	 * adding a new item, adding filters, and clearing filters
+	 * @return HBox with buttons for rendering the bottom left portion of the primary stage
+	 */
 	private HBox GetOptionsListButtons()
 	{
 		HBox rtnBox = new HBox();
@@ -257,7 +277,13 @@ public class Main extends Application {
 		return rtnBox;
 	}
 	
-	// Middle Center
+	/**
+	 * Center portion of the primary stage, with a button for adding a FoodItem to
+	 * the meal, and a button to remove a FoodItem from the meal
+	 * @param optionsList - The food options ListView instance, for use with enabling and disabling the add/remove buttons
+	 * @param meal - The meal ListView instance, for use with enabling and disabling the add/remove buttons
+	 * @return VBox with buttons for the center of the primary stage
+	 */
 	private VBox GetAddRemoveButtons(ListView<FoodItem> optionsList, ListView<FoodItem> meal)
 	{
 		VBox rtnBox = new VBox();
@@ -361,6 +387,11 @@ public class Main extends Application {
 		return rtnBox;
 	}
 	
+	/**
+	 * Top right portion of the primary stage, which contains only a label for the
+	 * meal ListView
+	 * @return HBox for the top right portion of the primary stage
+	 */
 	private HBox GetMealLabel()
 	{
 		HBox rtnBox = new HBox();
@@ -373,6 +404,11 @@ public class Main extends Application {
 		return rtnBox;
 	}
 	
+	/**
+	 * Middle right portion of the primary stage, which contains a ListView
+	 * for displaying the meal list as a scrollable list of food names
+	 * @return VBox for the middle right portion of the primary stage
+	 */
 	private VBox GetMealList()
 	{
 		VBox rtnBox = new VBox();
@@ -387,6 +423,11 @@ public class Main extends Application {
 		return rtnBox;
 	}
 	
+	/**
+	 * Bottom right portion of the primary stage, which includes a button
+	 * to clear the meal list and another button to analyze the current meal list
+	 * @return HBox for the bottom right portion of the primary stage
+	 */
 	private HBox GetMealAnalyzeClearButton()
 	{
 		HBox rtnBox = new HBox();
@@ -425,6 +466,10 @@ public class Main extends Application {
 		return rtnBox;
 	}
 	
+	/**
+	 * Get a new stage for editing filters. Launched from the primary stage
+	 * @return Stage with UI elements for editing filters
+	 */
 	private Stage GetFilterPopUp()
 	{
 		VBox root = new VBox();
@@ -433,8 +478,6 @@ public class Main extends Application {
 		// add standard styling to make it look consistent
 		filterScene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
 		Stage filters = newStage("Filters");
-		// make modal and set app's primary stage as the owner
-		filters.initOwner(this.primaryStage);
 		filters.setScene(filterScene);
 		filters.setOnHidden(new EventHandler<WindowEvent>() {
 	          public void handle(WindowEvent we) {
@@ -552,6 +595,10 @@ public class Main extends Application {
 		return filters;
 	}
 	
+	/**
+	 * Get a new stage for loading from a file. Launched from the primary stage
+	 * @return Stage with UI elements for loading from a file
+	 */
 	private Stage GetLoadPopUp()
 	{
 		Stage loadStage = newStage("Load Data");
@@ -613,11 +660,18 @@ public class Main extends Application {
 		return loadStage;
 	}
 	
+	/**
+	 * Set the items loaded label text with the number of items in the list
+	 */
 	private void SetNumItemsMsg()
 	{
 		this.numItemsLoaded.setText(controller.GetNumItemsLabelMsg());
 	}
 	
+	/**
+	 * Get a new stage for saving the options list to a file. Launched from the primary stage
+	 * @return Stage with UI elements for saving to a file
+	 */
 	private Stage GetSavePopUp()
 	{
 		Stage saveStage = newStage("Save Data");
@@ -685,6 +739,10 @@ public class Main extends Application {
 		return saveStage;
 	}
 	
+	/**
+	 * Get a new stage for adding a new item from scratch. Launched from the primary stage
+	 * @return Stage with UI elements for adding a new item
+	 */
 	private Stage GetNewItemPopUp()
 	{
 		Stage newItemStage = newStage("New Item");
@@ -758,6 +816,10 @@ public class Main extends Application {
 		return newItemStage;
 	}
 	
+	/**
+	 * Get a map of all nutrients mapped to 0.0, for use with getHorizontalNutrientsDisplay
+	 * @return treemap with Nutrients as keys and 0.0s as values
+	 */
 	private TreeMap<Nutrient, Double> getZerosInitialVals()
 	{
 		TreeMap<Nutrient, Double> rtnMap = new TreeMap<Nutrient, Double>();
@@ -770,17 +832,15 @@ public class Main extends Application {
 		return rtnMap;
 	}
 	
-	private VBox getVerticalNutrientsDisplay(TreeMap<Nutrient, Double> initialVals, TreeMap<Nutrient, TextField> createdFields, boolean readOnly)
-	{
-		VBox rtnBox = new VBox();
-		for (Nutrient nxt: Constants.Nutrient.values())
-		{
-			HBox nxtRow = getAddItemRow(nxt, initialVals.get(nxt), createdFields, readOnly);
-			rtnBox.getChildren().add(nxtRow);
-		}
-		return rtnBox;
-	}
-	
+	/**
+	 * Get a horizontal list of UI element pairs for each nutrient with a Label
+	 * stacked on top of a number field for each nutrient in our list. Can be initialized
+	 * with non-zero values for each, as in the Analysis pop-up
+	 * @param initialVals - treemap of nutrient/value pairs for initializing the number fields
+	 * @param createdFields - treemap of nutrient/TextField pairs for use by the caller, as in the Add Item pop-up
+	 * @param readOnly - should value fields be read-only, as in the analysis pop-up
+	 * @return HBox with stacked label/textfield pairs for each nutrient
+	 */
 	private HBox getHorizontalNutrientsDisplay(TreeMap<Nutrient, Double> initialVals, TreeMap<Nutrient, TextField> createdFields, boolean readOnly)
 	{
 		Pane spacer = new Pane();
@@ -795,6 +855,14 @@ public class Main extends Application {
 		return rtnBox;
 	}
 	
+	/**
+	 * Get a VBox with a label sitting atop a number-only textfield
+	 * @param nutrient - the nutrient to create the label/field for
+	 * @param initialVal - initial value to set in the textfield
+	 * @param createdFields - map of created fields, for use by the caller of getHorizontalNutrientsDisplay
+	 * @param readOnly - should the value field be read-only, as in the Analysis pop-up
+	 * @return VBox with label sitting atop a number-only textfield
+	 */
 	private VBox getStackedUserInputBox(Nutrient nutrient, Double initialVal, TreeMap<Nutrient, TextField> createdFields, boolean readOnly)
 	{
 		int width = 70;
@@ -826,36 +894,10 @@ public class Main extends Application {
 		return rtnBox;
 	}
 	
-	private HBox getAddItemRow(Nutrient nutrient, Double initialVal, TreeMap<Nutrient, TextField> createdFields, boolean readOnly)
-	{
-		HBox rtnRow = new HBox();
-		rtnRow.getStyleClass().add("thin-hbox");
-		String labelText;
-		if (nutrient == Nutrient.carbohydrate)
-		{
-			labelText = "carbs";
-		}
-		else
-		{
-			labelText = nutrient.toString();
-		}
-		Label rowLabel = new Label(labelText);
-		Pane spacer = new Pane();
-	    HBox.setHgrow(spacer, Priority.ALWAYS);
-		TextField rowField = getNumberOnlyTextField(initialVal);
-		if (readOnly)
-		{
-			rowField.setDisable(true);
-			rowField.getStyleClass().add("readonly-textfield");
-		}
-		rowField.setMaxWidth(60);
-		
-		createdFields.put(nutrient, rowField);
-		
-		rtnRow.getChildren().addAll(rowLabel, spacer, rowField);
-		return rtnRow;
-	}
-	
+	/**
+	 * Get a new stage for reviewing an analysis of the current meal. Launched from the primary stage
+	 * @return Stage with UI elements for reviewing an analysis of the current meal
+	 */
 	private Stage GetAnalysisPopUp()
 	{
 		Stage analysis = newStage("Meal Analysis");
@@ -882,6 +924,14 @@ public class Main extends Application {
 		
 	}
 	
+	/**
+	 * Get a new button with the specified caption and ID and optionally, an enforced minimum width
+	 * for consistent sizing in stages where there are multiple buttons
+	 * @param btnCaption - caption to add to the button
+	 * @param ID - ID for use when looking up UI elements from the scene
+	 * @param enforceMinWidth - if true, uses the minButtonSize set a minimum width. Otherwise, takes default width
+	 * @return Button with specified caption and ID
+	 */
 	private Button newButton(String btnCaption, String ID, boolean enforceMinWidth)
 	{
 		Button rtnButton = new Button(btnCaption);
@@ -894,6 +944,12 @@ public class Main extends Application {
 		return rtnButton;
 	}
 	
+	/**
+	 * Get a TextField element that allows only numbers (including decimals)
+	 * https://stackoverflow.com/questions/40485521/javafx-textfield-validation-decimal-value
+	 * @param initialVal - initial value to set in the field
+	 * @return TextField element that allows only numbers (including decimals)
+	 */
 	private TextField getNumberOnlyTextField(Double initialVal)
 	{
 		TextField rtnField = new TextField(initialVal.toString());
@@ -910,8 +966,9 @@ public class Main extends Application {
 		
 		return rtnField;
 	}
-	/*
-	 * Get a new stage that's modal + not resizable
+	
+	/**
+	 * Get a new stage that's modal + not resizable and has primary stage set as its owner
 	 * @param title - the title for the new stage
 	 * @return new stage with title set, modal = true, & resizable = false
 	 */
@@ -920,6 +977,7 @@ public class Main extends Application {
 		Stage rtnStage = new Stage();
 		rtnStage.setResizable(false);
 		rtnStage.setTitle(title);
+		rtnStage.initOwner(this.primaryStage);
 		rtnStage.initModality(Modality.APPLICATION_MODAL);
 		return rtnStage;
 	}
