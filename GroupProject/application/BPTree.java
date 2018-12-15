@@ -9,7 +9,7 @@
  * Due Date:   12/16/18
  * Version:    1.0
  * 
- * Credits:    N/A
+ * Credits:    Wikipedia, for a definition of the structure
  * 
  * Bugs:       No known bugs
  */
@@ -25,14 +25,15 @@ import java.util.Queue;
 import java.util.TreeMap;
 
 /**
- * 
  * Implementation of a B+ tree to allow efficient access to
  * many different indices of a large data set. 
- * BPTree objects are created for each type of index
- * needed by the program.  BPTrees provide an efficient
- * range search as compared to other types of data structures
- * due to the ability to perform log_m N lookups and
- * linear in-order traversals of the data items.
+ * 
+ * This implementation uses lists for storage at each key in the leaf nodes, which 
+ * is specific to this application of the B+ tree. This allows easy handling of duplicate 
+ * keys and maintains efficient range searching. This is NOT meant to be an implementation for
+ * use with file storage, where the nodes are meant to be used for matching storage block 
+ * sizes. But in this application, it should meet the needs efficiently and without a lot of
+ * complexity in implementation.
  * 
  * @author sapan (sapan@cs.wisc.edu), Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
  *

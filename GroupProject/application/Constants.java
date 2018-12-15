@@ -1,7 +1,7 @@
 /**
  * Filename:   Constants.java
  * Project:    Group Project
- * Authors:    sapan (sapan@cs.wisc.edu), Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
+ * Authors:    Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
  *
  * Semester:   Fall 2018
  * Course:     CS400 - Lecutre 46373

@@ -1,3 +1,19 @@
+/**
+ * Filename:   FoodData.java
+ * Project:    Group Project
+ * Authors:    sapan (sapan@cs.wisc.edu), Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
+ *
+ * Semester:   Fall 2018
+ * Course:     CS400 - Lecutre 46373
+ * 
+ * Due Date:   12/16/18
+ * Version:    1.0
+ * 
+ * Credits:    N/A
+ * 
+ * Bugs:       No known bugs
+ */
+
 package application;
 import java.io.File;
 import java.io.FileNotFoundException;
