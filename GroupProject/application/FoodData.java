@@ -15,7 +15,8 @@ import java.util.Scanner;
 
 /**
  * This class represents the backend for managing all 
- * the operations associated with FoodItems
+ * the operations associated with FoodItems. 
+ * Implements FoodDataADT<FoodItem> 
  * 
  * @author sapan (sapan@cs.wisc.edu), Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
  */
@@ -30,7 +31,7 @@ public class FoodData implements FoodDataADT<FoodItem> {
     // hashed set of all of the food items for quick lookup while applying filters
     private HashSet<FoodItem> foodItemLookup;
     
-    // Map of nutrients and their corresponding index
+    // Map of nutrients and their corresponding indices
     private HashMap<String, BPTree<Double, FoodItem>> indexes;
     
     /**
@@ -71,24 +72,24 @@ public class FoodData implements FoodDataADT<FoodItem> {
      */
     @Override
     public void loadFoodItems(String filePath) {
-    	
+    	// try to load data from file
     	List<String> rawData = null;
     	try
     	{
     		rawData = loadFromFile(filePath);
     	}
-    	catch (FileNotFoundException e)
-    	{
-    		// I don't love this, but we can't pass errors back with the given method signature, so do nothing
-    	}
+    	catch (FileNotFoundException e)	{ }
+    	
     	if (rawData != null)
     	{
     		clearFoodItems();
-    		// parse data and add it to our session's food list
+    		// if data exists, parse and add it to our session's food list
         	parseData(rawData);
     	}
     }
-    
+    /**
+     *  Reset food item list and hashed set
+     */
     private void clearFoodItems()
     {
     	this.foodItemList = new LinkedList<FoodItem>();
@@ -97,6 +98,7 @@ public class FoodData implements FoodDataADT<FoodItem> {
     
     /**
      * Load all lines of data from a file
+     * 
      * @param filePath
      * @throws SecurityException - if a security manager exists and its SecurityManager.checkRead(java.lang.String) method denies read access to the file or directory
      * @throws FileNotFoundException - if filePath is not found
@@ -194,7 +196,7 @@ public class FoodData implements FoodDataADT<FoodItem> {
         for (String rule: rules)
         {
         	String[] pieces = rule.split(" ");
-        	
+        	// use rule to filter current list of food items
         	filtered = filterByOneRule(current, pieces[0], pieces[1], pieces[2]);
         	current = filtered;
         }
@@ -204,10 +206,19 @@ public class FoodData implements FoodDataADT<FoodItem> {
         {
         	rtnList.add(nxt);
         }
-        
+        // return filtered list of food items
         return rtnList;
     }
-    
+    /**
+     * Filter a hashed set of food items based on a rule
+     * 
+     * @param startingList - initial list of food items to be filtered
+     * @param nutrient - string specifying nutrient to filter by
+     * @param comparator - string specifying comparator
+     * @param amt - string specifying amount 
+     * @return filtered list of food items
+     * 
+     */
     private HashSet<FoodItem> filterByOneRule(HashSet<FoodItem> startingList, String nutrient, String comparator, String amt)
     {
     	HashSet<FoodItem> rtnList = new HashSet<FoodItem>();
@@ -277,7 +288,12 @@ public class FoodData implements FoodDataADT<FoodItem> {
 		} 
 		catch (IOException e) { }
     }
-    
+    /**
+    * format food data to be saved to file
+    * 
+    * @param list - list of food data to be formatted
+    * @return list of formatted food data
+    */
     private Collection<String> formatData(List<FoodItem> list)
     {
     	List<String> formattedData = new LinkedList<String>();
@@ -288,7 +304,12 @@ public class FoodData implements FoodDataADT<FoodItem> {
     	
     	return formattedData;
     }
-    
+    /**
+     * translate data about a single food item to a formatted string
+     * 
+     * @param item - the food item to be formatted
+     * @return string with formatted food item data
+     */
     private String serializeFoodItem(FoodItem item)
     {
     	StringBuilder sb = new StringBuilder();

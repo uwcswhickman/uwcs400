@@ -697,6 +697,7 @@ public class Main extends Application {
 		Label idLabel = new Label("ID");
 		idLabel.getStyleClass().add("thin-label");
 		TextField idField = new TextField(controller.GetUniqueID());
+		idField.setPromptText("Enter a unique ID");
 		idField.setMinWidth(nameWidth);
 		idRow.getChildren().addAll(idLabel, idField);
 		
