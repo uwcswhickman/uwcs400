@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.TreeMap;
 
+import application.Constants.IOMessage;
 import application.Constants.Nutrient;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
@@ -53,9 +54,18 @@ public class ViewController {
 		// initialize idIndex from our data
 		// instantiate other fields with empty objects
 		this.sessionData = new FoodData();
-		this.sessionData.loadFoodItems(Constants.InitialDataPath);
+		//this.sessionData.loadFoodItems(Constants.InitialDataPath);
 		this.rng = new Random();
 		this.idIndex = new HashSet<String>();
+		
+
+		// filters list that we'll show in a pop-up
+		this.allFiltersLV = new ListView<String>();
+		this.allFiltersProperty =  new SimpleListProperty<String>(FXCollections.observableArrayList());
+		this.allFiltersLV.itemsProperty().bind(allFiltersProperty);
+		this.nameContains = "";
+		this.attributeRules = new LinkedList<String>();
+		
 		// food options list initial setup
 		this.foodOptionsLV = new ListView<FoodItem>();
 		this.foodOptionsProperty = new SimpleListProperty<FoodItem>(FXCollections.observableArrayList());
@@ -71,13 +81,6 @@ public class ViewController {
 		});
 		
 		resetFoodOptionsList();
-		
-		// filters list that we'll show in a pop-up
-		this.allFiltersLV = new ListView<String>();
-		this.allFiltersProperty =  new SimpleListProperty<String>(FXCollections.observableArrayList());
-		this.allFiltersLV.itemsProperty().bind(allFiltersProperty);
-		this.nameContains = "";
-		this.attributeRules = new LinkedList<String>();
 		
 		// meal initial setup
 		this.mealLV = new ListView<FoodItem>();
@@ -110,7 +113,7 @@ public class ViewController {
 	}
 	
 	// File I/O
-	public String TrySave(String filename)
+	public IOMessage TrySave(String filename)
 	{
 		// try to check for path existence
 		File file = new File(filename);
@@ -119,39 +122,40 @@ public class ViewController {
     	try 
 		{
 	        if (file.createNewFile())                          
-	        {           
+	        {
 				FileWriter fw = new FileWriter(file);
 				
 				fw.close();
+				file.delete();
 	        }
-	        file.delete();
 		}
 		catch (IOException e) 
     	{ 
-			return "Could not edit file";
+			return IOMessage.IOEx;
     	}
     	catch (SecurityException e)
     	{
-    		return "You do not have the security to access the file specified";
+    		return IOMessage.SecurityEx;
     	}
     	catch (Exception e)
     	{
-    		return "Unexpected exception encountered. Data was not saved.";
+    		return IOMessage.UnexpectedEx;
     	}
 		// then actually save
     	this.sessionData.saveFoodItems(filename);
 		if (file.exists())
 		{
-			return "Data saved successfully";
+			return IOMessage.Success;
 		}
 		else
 		{
-			return "Unexpected error encountered. Data was not saved.";
+			return IOMessage.UnexpectedEx;
 		}
 	}
 	
-	public String TryLoad(String filePath)
+	public IOMessage TryLoad(String filePath)
 	{
+		
 		// we're going to do the basic checks that the FoodData load method does, 
 		// but then we can send an error to the user, if we run into trouble
 		try {
@@ -165,31 +169,47 @@ public class ViewController {
 	        }
 	        else
 	        {
-	        	return "Could not find file specified";
+	        	return IOMessage.FileNotFoundEx;
 	        }
-		}
-		catch (FileNotFoundException e)
-		{
-			return "Could not find file specified";
 		}
 		catch (SecurityException e)
 		{
-			return "You do not have the security to access the file specified";
+			return IOMessage.SecurityEx;
 		}
 		catch (Exception e)
 		{
-			return "Unexpected exception caught. File was not loaded";
+			return IOMessage.UnexpectedEx;
 		}
+		
+		
 		this.sessionData.loadFoodItems(filePath);
 		if (this.sessionData.getAllFoodItems().size() > 0)
 		{
 			resetFoodOptionsList();
 			resetMealList();
-			return "Items loaded";
+			return IOMessage.Success;
 		}
 		else
 		{
-			return "No items loaded. Please check the contents of the file specified";
+			return IOMessage.UnexpectedEx;
+		}
+	}
+	
+	public String GetLongIOMessage(IOMessage msg)
+	{
+		switch(msg)
+		{
+			case Success:
+				return "Success";
+			case SecurityEx:
+				return "You do not have access to this location";
+			case IOEx:
+				return "A file I/O exception occurred";
+			case FileNotFoundEx:
+				return "Could not find the file specified";
+			default:
+				return "Unexpected error occurred";
+			
 		}
 	}
 	
@@ -203,6 +223,11 @@ public class ViewController {
 		}
 		
 		return rtnStr;
+	}
+	
+	public int GetNumItemsLoaded()
+	{
+		return this.sessionData.getAllFoodItems().size();
 	}
 	
 	// Meal methods
@@ -373,6 +398,7 @@ public class ViewController {
 				parseNutrient(Nutrient.fiber, fiber, newItem);
 				parseNutrient(Nutrient.protein, protein, newItem);
 				this.sessionData.addFoodItem(newItem);
+				this.idIndex.add(ID);
 				SortFoodList();
 				ApplyFilters();
 			}

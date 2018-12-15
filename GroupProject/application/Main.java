@@ -3,6 +3,7 @@ import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.TreeMap;
 
+import application.Constants.IOMessage;
 import application.Constants.Nutrient;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
@@ -12,7 +13,10 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -46,7 +50,7 @@ import javafx.stage.WindowEvent;
  * @author Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
  *
  */
-public class View extends Application {
+public class Main extends Application {
 	
 	// to make grid height and width all relative to a single number input so we can easily update it with one number
 	private static final double smallSectionRatio = .3; // for columns, the middle is 30% the size of left and right; for rows, the top and bottom are 30% the size of the middle row
@@ -81,6 +85,13 @@ public class View extends Application {
 		{
 			this.controller = new ViewController();
 			this.primaryStage = primaryStage;
+			if (controller.TryLoad(Constants.InitialDataPath) != IOMessage.Success)
+			{
+				Alert initialLoadAlert = new Alert(AlertType.WARNING, "Could not load " + Constants.InitialDataPath);
+				
+				initialLoadAlert.showAndWait()
+					.filter(response -> response == ButtonType.OK);
+			}
 			GridPane parent = new GridPane();
 			
 			// top left - options label + load/save list
@@ -108,6 +119,7 @@ public class View extends Application {
 			primaryStage.setTitle("Meal Analysis App");
 			primaryStage.setResizable(false);
 			primaryStage.setScene(scene);
+			
 			primaryStage.show();
 		}
 		catch (Exception e)
@@ -564,7 +576,16 @@ public class View extends Application {
 					@Override
 					public void handle(ActionEvent event)
 					{
-						msgLabel.setText(controller.TryLoad(fileField.getText()));
+						IOMessage rtnVal = controller.TryLoad(fileField.getText());
+						if (rtnVal == IOMessage.Success)
+						{
+							controller.ClearRules();
+							msgLabel.setText("Items successfully loaded");
+						}
+						else
+						{
+							msgLabel.setText(controller.GetLongIOMessage(rtnVal));
+						}
 						SetNumItemsMsg();
 					}
 				});
@@ -621,7 +642,22 @@ public class View extends Application {
 					@Override
 					public void handle(ActionEvent event)
 					{
-						msgLabel.setText(controller.TrySave(fileField.getText()));
+						if (controller.GetNumItemsLoaded() > 0)
+						{
+							IOMessage rtnVal = controller.TrySave(fileField.getText());
+							if (rtnVal == IOMessage.Success)
+							{
+								msgLabel.setText("Items saved successfully");
+							}
+							else
+							{
+								msgLabel.setText(controller.GetLongIOMessage(rtnVal));
+							}
+						}
+						else
+						{
+							msgLabel.setText("Food options list is empty. No items to save.");
+						}
 					}
 				});
 		
