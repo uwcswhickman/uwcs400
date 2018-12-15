@@ -18,19 +18,15 @@ public class BPTreeTest {
 	private static FoodData largeDataSmallBranch;
 	private static FoodData largeDataLargeBranch;
 	private static List<FoodItem> foodItems;
-	private static int numToLoad = 100000;
-	private static String largeItemListPath = System.getProperty("user.dir") + "/foodItemsLarge.csv";
+	private static String largeItemListPath = Constants.InitialDataPath;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		data = new FoodData();
-		data.SetNumToLoad(numToLoad);
 		data.loadFoodItems(Constants.InitialDataPath);
 		largeDataSmallBranch = new FoodData();
-		largeDataSmallBranch.SetNumToLoad(numToLoad);
 		largeDataSmallBranch.loadFoodItems(largeItemListPath);
-		largeDataLargeBranch = new FoodData(203);
-		largeDataLargeBranch.SetNumToLoad(numToLoad);
+		largeDataLargeBranch = new FoodData();
 		largeDataLargeBranch.loadFoodItems(largeItemListPath);
 		foodItems = data.getAllFoodItems();
 	}
