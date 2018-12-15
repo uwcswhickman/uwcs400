@@ -1,6 +1,26 @@
+/**
+ * Filename:   ViewController.java
+ * Project:    Group Project
+ * Authors:    sapan (sapan@cs.wisc.edu), Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
+ *
+ * Semester:   Fall 2018
+ * Course:     CS400 - Lecutre 46373
+ * 
+ * Due Date:   12/16/18
+ * Version:    1.0
+ * 
+ * Credits:    N/A
+ *   Observable list implementation learned from https://rterp.wordpress.com/2015/09/21/binding-a-list-of-strings-to-a-javafx-listview
+ *   Cell factory from https://stackoverflow.com/questions/44597921/how-to-specify-what-property-a-javafx-listview-should-display-when-using-a-custo
+ *   Styling from combination of various sources including
+ *   - https://docs.oracle.com/javafx/2/layout/size_align.htm
+ *   - http://fxexperience.com/2011/12/styling-fx-buttons-with-css/
+ *   - https://docs.oracle.com/javafx/2/api/javafx/scene/doc-files/cssref.html
+ *   - https://stackoverflow.com/questions/43508511/hover-and-pressed-in-javafx
+ * Bugs:       No known bugs
+ */
 package application;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collections;
@@ -10,7 +30,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.TreeMap;
-
 import application.Constants.IOMessage;
 import application.Constants.Nutrient;
 import javafx.beans.property.SimpleListProperty;
@@ -19,17 +38,10 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 
 /**
- * 
- * Resources
- *   Observable list implementation learned from https://rterp.wordpress.com/2015/09/21/binding-a-list-of-strings-to-a-javafx-listview
- *   Cell factory from https://stackoverflow.com/questions/44597921/how-to-specify-what-property-a-javafx-listview-should-display-when-using-a-custo
- *   Styling from combination of various sources including
- *   - https://docs.oracle.com/javafx/2/layout/size_align.htm
- *   - http://fxexperience.com/2011/12/styling-fx-buttons-with-css/
- *   - https://docs.oracle.com/javafx/2/api/javafx/scene/doc-files/cssref.html
- *   - https://stackoverflow.com/questions/43508511/hover-and-pressed-in-javafx
- * @author Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
- *
+ * Controller class used by the Main view class to mostly separate UI from actions
+ * Creates an instance of the foodData class and wraps some of the data structures 
+ * in UI-friendly formats like observable lists. Also does file I/O checking and reporting
+ * that were not possible with the foodData class method signatures 
  */
 public class ViewController {
 	

@@ -9,7 +9,18 @@
  * Due Date:   12/16/18
  * Version:    1.0
  * 
- * Credits:    N/A
+ * Credits:    Resources
+ * Pop-up implementation from here: https://stackoverflow.com/questions/22166610/how-to-create-a-popup-windows-in-javafx
+ * numeric text field from here: https://stackoverflow.com/questions/40485521/javafx-textfield-validation-decimal-value
+ * focus and selection clearing in listviews - https://stackoverflow.com/questions/51520325/clear-selection-when-tableview-loses-focus
+ * focus and selection - https://stackoverflow.com/questions/17522686/javafx-tabpane-how-to-listen-to-selection-changes
+ * Styling tips from combination of various sources including
+ *   - https://docs.oracle.com/javafx/2/layout/size_align.htm
+ *   - http://fxexperience.com/2011/12/styling-fx-buttons-with-css/
+ *   - https://docs.oracle.com/javafx/2/api/javafx/scene/doc-files/cssref.html
+ *   - https://stackoverflow.com/questions/43508511/hover-and-pressed-in-javafx
+ *   - https://stackoverflow.com/questions/39214586/how-to-align-a-button-right-in-javafx
+ *   - https://stackoverflow.com/questions/25336796/tooltip-background-with-javafx-css
  * 
  * Bugs:       No known bugs
  */
@@ -46,18 +57,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 /**
- * Resources
- * Pop-up implementation from here: https://stackoverflow.com/questions/22166610/how-to-create-a-popup-windows-in-javafx
- * numeric text field from here: https://stackoverflow.com/questions/40485521/javafx-textfield-validation-decimal-value
- * focus and selection clearing in listviews - https://stackoverflow.com/questions/51520325/clear-selection-when-tableview-loses-focus
- * focus and selection - https://stackoverflow.com/questions/17522686/javafx-tabpane-how-to-listen-to-selection-changes
- * Styling tips from combination of various sources including
- *   - https://docs.oracle.com/javafx/2/layout/size_align.htm
- *   - http://fxexperience.com/2011/12/styling-fx-buttons-with-css/
- *   - https://docs.oracle.com/javafx/2/api/javafx/scene/doc-files/cssref.html
- *   - https://stackoverflow.com/questions/43508511/hover-and-pressed-in-javafx
- *   - https://stackoverflow.com/questions/39214586/how-to-align-a-button-right-in-javafx
- *   - https://stackoverflow.com/questions/25336796/tooltip-background-with-javafx-css
+ * JavaFX UI class 
  *   
  * @author Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
  *
@@ -858,9 +858,19 @@ public class Main extends Application {
 	{
 		Stage analysis = newStage("Meal Analysis");
 		
+		HBox header = new HBox();
+		Label headerLabel = new Label("Totals for selected meal");
+		header.getChildren().add(headerLabel);
+		
+		HBox nutrientContainer = new HBox();
 		TreeMap<Nutrient, Double> nutrientSums = controller.GetMealAnalysis();
 		TreeMap<Nutrient, TextField> createdFields = new TreeMap<Nutrient, TextField>();
-		VBox root = getVerticalNutrientsDisplay(nutrientSums, createdFields, true);
+		HBox nutrientList = getHorizontalNutrientsDisplay(nutrientSums, createdFields, true);
+		
+		nutrientContainer.getChildren().add(nutrientList);
+		
+		VBox root = new VBox();
+		root.getChildren().addAll(header, nutrientContainer);
 		
 		Scene analysisScene = new Scene(root);
 		analysisScene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());

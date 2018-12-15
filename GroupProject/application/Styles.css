@@ -1,13 +1,25 @@
 /**
- * @author - Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
- * Styling tips from combination of various sources including
- *   - https://docs.oracle.com/javafx/2/layout/size_align.htm
- *   - http://fxexperience.com/2011/12/styling-fx-buttons-with-css/
- *   - https://docs.oracle.com/javafx/2/api/javafx/scene/doc-files/cssref.html
- *   - https://stackoverflow.com/questions/43508511/hover-and-pressed-in-javafx
- *   - https://stackoverflow.com/questions/39214586/how-to-align-a-button-right-in-javafx
- *   - https://stackoverflow.com/questions/25336796/tooltip-background-with-javafx-css
- *   - https://stackoverflow.com/questions/20205145/javafx-how-to-show-read-only-text
+ * Filename:   BPTree.java
+ * Project:    Group Project
+ * Authors:    sapan (sapan@cs.wisc.edu), Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
+ *
+ * Semester:   Fall 2018
+ * Course:     CS400 - Lecutre 46373
+ * 
+ * Due Date:   12/16/18
+ * Version:    1.0
+ * 
+ * Credits:    
+ *       Styling tips from combination of various sources including
+ *       - https://docs.oracle.com/javafx/2/layout/size_align.htm
+ *       - http://fxexperience.com/2011/12/styling-fx-buttons-with-css/
+ *       - https://docs.oracle.com/javafx/2/api/javafx/scene/doc-files/cssref.html
+ *       - https://stackoverflow.com/questions/43508511/hover-and-pressed-in-javafx
+ *       - https://stackoverflow.com/questions/39214586/how-to-align-a-button-right-in-javafx
+ *       - https://stackoverflow.com/questions/25336796/tooltip-background-with-javafx-css
+ *       - https://stackoverflow.com/questions/20205145/javafx-how-to-show-read-only-text
+ * 
+ * Bugs:       No known bugs
  */
 
 GridPane {
