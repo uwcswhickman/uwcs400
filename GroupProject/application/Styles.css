@@ -90,6 +90,10 @@ ListView {
 	-fx-padding: 0px;
 }
 
+.thin-vbox {
+	-fx-padding: 0px;
+}
+
 .number-field {
 	-fx-padding: 3px;
     -fx-border-insets: 4px;

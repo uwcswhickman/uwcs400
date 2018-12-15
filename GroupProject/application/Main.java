@@ -684,7 +684,7 @@ public class Main extends Application {
 		Pane idSpacer = new Pane();
 		HBox.setHgrow(idSpacer, Priority.ALWAYS);
 		TextField idField = new TextField(controller.GetUniqueID());
-		idField.setMinWidth(500);
+		idField.setMinWidth(200);
 		idRow.getChildren().addAll(idLabel, idSpacer, idField);
 		
 		HBox nameRow = new HBox();
@@ -692,12 +692,12 @@ public class Main extends Application {
 		Pane nameSpacer = new Pane();
 		HBox.setHgrow(nameSpacer, Priority.ALWAYS);
 		TextField nameField = new TextField();
-		nameField.setMinWidth(500);
+		nameField.setMinWidth(200);
 		nameRow.getChildren().addAll(nameLabel, nameSpacer, nameField);
 		
 		HBox nutrientRow = new HBox();
 		TreeMap<Nutrient, TextField> createdFields = new TreeMap<Nutrient, TextField>();
-		VBox nutrientVals = getNutrientsDisplay(getZerosInitialVals(), createdFields, false);
+		VBox nutrientVals = getVerticalNutrientsDisplay(getZerosInitialVals(), createdFields, false);
 		HBox btnContainer = new HBox();
 		Pane buttonSpacer = new Pane();
 		HBox.setHgrow(buttonSpacer, Priority.ALWAYS);
@@ -746,7 +746,7 @@ public class Main extends Application {
 		return rtnMap;
 	}
 	
-	private VBox getNutrientsDisplay(TreeMap<Nutrient, Double> initialVals, TreeMap<Nutrient, TextField> createdFields, boolean readOnly)
+	private VBox getVerticalNutrientsDisplay(TreeMap<Nutrient, Double> initialVals, TreeMap<Nutrient, TextField> createdFields, boolean readOnly)
 	{
 		VBox rtnBox = new VBox();
 		for (Nutrient nxt: Constants.Nutrient.values())
@@ -756,6 +756,8 @@ public class Main extends Application {
 		}
 		return rtnBox;
 	}
+	
+	
 	
 	private VBox getStackedUserInputBox(String labelText)
 	{
@@ -776,7 +778,7 @@ public class Main extends Application {
 		String labelText;
 		if (nutrient == Nutrient.carbohydrate)
 		{
-			labelText = "carbohydrates";
+			labelText = "carbs";
 		}
 		else
 		{
@@ -805,7 +807,7 @@ public class Main extends Application {
 		
 		TreeMap<Nutrient, Double> nutrientSums = controller.GetMealAnalysis();
 		TreeMap<Nutrient, TextField> createdFields = new TreeMap<Nutrient, TextField>();
-		VBox root = getNutrientsDisplay(nutrientSums, createdFields, true);
+		VBox root = getVerticalNutrientsDisplay(nutrientSums, createdFields, true);
 		
 		Scene analysisScene = new Scene(root);
 		analysisScene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
