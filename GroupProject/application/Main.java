@@ -703,7 +703,8 @@ public class Main extends Application {
 		VBox nameRow = new VBox();
 		Label nameLabel = new Label("Name");
 		nameLabel.getStyleClass().add("thin-label");
-		TextField nameField = new TextField("NewItem");
+		TextField nameField = new TextField();
+		nameField.setPromptText("Enter new item name");
 		nameField.setMinWidth(nameWidth);
 		nameRow.getChildren().addAll(nameLabel, nameField);
 		
