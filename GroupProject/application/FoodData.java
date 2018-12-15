@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,22 +49,6 @@ public class FoodData implements FoodDataADT<FoodItem> {
     
     /**
      * Loads the data in the .csv file
-     * 
-     * file format:
-     * <id1>,<name>,<nutrient1>,<value1>,<nutrient2>,<value2>,...
-     * <id2>,<name>,<nutrient1>,<value1>,<nutrient2>,<value2>,...
-     * 
-     * Example:
-     * 556540ff5d613c9d5f5935a9,Stewarts_PremiumDarkChocolatewithMintCookieCrunch,calories,280,fat,18,carbohydrate,34,fiber,3,protein,3
-     * 
-     * Note:
-     *     1. All the rows are in valid format.
-     *  2. All IDs are unique.
-     *  3. Names can be duplicate.
-     *  4. All columns are strictly alphanumeric (a-zA-Z0-9_).
-     *  5. All food items will strictly contain 5 nutrients in the given order:    
-     *     calories,fat,carbohydrate,fiber,protein
-     *  6. Nutrients are CASE-INSENSITIVE. 
      * 
      * @param filePath path of the food item data file 
      *        (e.g. folder1/subfolder1/.../foodItems.csv) 
@@ -163,9 +146,11 @@ public class FoodData implements FoodDataADT<FoodItem> {
     		});
     }
     
-    /*
-     * (non-Javadoc)
-     * @see skeleton.FoodDataADT#filterByName(java.lang.String)
+    /**
+     * Gets all the food items that have name containing the substring - case-insensitive
+     * 
+     * @param substring - substring to be searched
+     * @return list of filtered food items; if no food item matched, return empty list
      */
     @Override
     public List<FoodItem> filterByName(String substring) {
@@ -185,9 +170,11 @@ public class FoodData implements FoodDataADT<FoodItem> {
         return rtnList;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see skeleton.FoodDataADT#filterByNutrients(java.util.List)
+    /**
+     * Gets all the food items that fulfill ALL the provided rules
+     * 
+     * @param rules - list of rules
+     * @return list of filtered food items; if no food item matched, return empty list
      */
     @Override
     public List<FoodItem> filterByNutrients(List<String> rules) {
@@ -235,9 +222,9 @@ public class FoodData implements FoodDataADT<FoodItem> {
     	return rtnList;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see skeleton.FoodDataADT#addFoodItem(skeleton.FoodItem)
+    /**
+     * Adds a food item to the loaded data.
+     * @param foodItem - the food item instance to be added
      */
     @Override
     public void addFoodItem(FoodItem foodItem) {
@@ -252,9 +239,9 @@ public class FoodData implements FoodDataADT<FoodItem> {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see skeleton.FoodDataADT#getAllFoodItems()
+    /**
+     * Gets the list of all food items.
+     * @return list of FoodItem
      */
     @Override
     public List<FoodItem> getAllFoodItems() {
