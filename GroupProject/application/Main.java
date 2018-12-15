@@ -679,29 +679,33 @@ public class Main extends Application {
 		
 		VBox root = new VBox();
 		
-		HBox idRow = new HBox();
-		Label idLabel = new Label("ID");
-		Pane idSpacer = new Pane();
-		HBox.setHgrow(idSpacer, Priority.ALWAYS);
-		TextField idField = new TextField(controller.GetUniqueID());
-		idField.setMinWidth(200);
-		idRow.getChildren().addAll(idLabel, idSpacer, idField);
+		int nameWidth = 250;
 		
-		HBox nameRow = new HBox();
+		VBox idRow = new VBox();
+		Label idLabel = new Label("ID");
+		idLabel.getStyleClass().add("thin-label");
+		TextField idField = new TextField(controller.GetUniqueID());
+		idField.setMinWidth(nameWidth);
+		idRow.getChildren().addAll(idLabel, idField);
+		
+		VBox nameRow = new VBox();
 		Label nameLabel = new Label("Name");
-		Pane nameSpacer = new Pane();
-		HBox.setHgrow(nameSpacer, Priority.ALWAYS);
-		TextField nameField = new TextField();
-		nameField.setMinWidth(200);
-		nameRow.getChildren().addAll(nameLabel, nameSpacer, nameField);
+		nameLabel.getStyleClass().add("thin-label");
+		TextField nameField = new TextField("NewItem");
+		nameField.setMinWidth(nameWidth);
+		nameRow.getChildren().addAll(nameLabel, nameField);
+		
+		TreeMap<Nutrient, TextField> createdFields = new TreeMap<Nutrient, TextField>();
 		
 		HBox nutrientRow = new HBox();
-		TreeMap<Nutrient, TextField> createdFields = new TreeMap<Nutrient, TextField>();
-		VBox nutrientVals = getVerticalNutrientsDisplay(getZerosInitialVals(), createdFields, false);
-		HBox btnContainer = new HBox();
+		
+		HBox nutrientVals = getHorizontalNutrientsDisplay(getZerosInitialVals(), createdFields, false);
+		nutrientRow.setAlignment(Pos.CENTER);
+		nutrientRow.getChildren().add(nutrientVals);
+		
+		HBox btnRow = new HBox();
 		Pane buttonSpacer = new Pane();
 		HBox.setHgrow(buttonSpacer, Priority.ALWAYS);
-		btnContainer.setAlignment(Pos.BOTTOM_RIGHT);
 		Button addButton = newButton("Add Item", "btnAddItmFromPopup", true); 
 		addButton.setOnAction(
 				new EventHandler<ActionEvent>()
@@ -722,10 +726,9 @@ public class Main extends Application {
 						newItemStage.close();
 					}
 				});
-		btnContainer.getChildren().add(addButton);
-		nutrientRow.getChildren().addAll(nutrientVals, buttonSpacer, btnContainer);
+		btnRow.getChildren().addAll(buttonSpacer, addButton);
 		
-		root.getChildren().addAll(idRow, nameRow, nutrientRow);
+		root.getChildren().addAll(idRow, nameRow, nutrientRow, btnRow);
 		
 		Scene newItemScene = new Scene(root);
 		newItemScene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
@@ -757,17 +760,48 @@ public class Main extends Application {
 		return rtnBox;
 	}
 	
-	
-	
-	private VBox getStackedUserInputBox(String labelText)
+	private HBox getHorizontalNutrientsDisplay(TreeMap<Nutrient, Double> initialVals, TreeMap<Nutrient, TextField> createdFields, boolean readOnly)
 	{
+		Pane spacer = new Pane();
+		HBox.setHgrow(spacer, Priority.ALWAYS);
+		HBox rtnBox = new HBox();
+		rtnBox.getChildren().add(spacer);
+		for (Nutrient nxt: Constants.Nutrient.values())
+		{
+			VBox nxtCol = getStackedUserInputBox(nxt, initialVals.get(nxt), createdFields, readOnly);
+			rtnBox.getChildren().add(nxtCol);
+		}
+		return rtnBox;
+	}
+	
+	private VBox getStackedUserInputBox(Nutrient nutrient, Double initialVal, TreeMap<Nutrient, TextField> createdFields, boolean readOnly)
+	{
+		int width = 70;
 		VBox rtnBox = new VBox();
 		rtnBox.getStyleClass().add("thin-vbox");
-		Label rowLabel = new Label(labelText);
-		rowLabel.setMinWidth(100);
-		TextField rowField = new TextField();
-		rowField.setMinWidth(100);
-		rtnBox.getChildren().addAll(rowLabel, rowField);
+		String labelText;
+		if (nutrient == Nutrient.carbohydrate)
+		{
+			labelText = "carbs";
+		}
+		else
+		{
+			labelText = nutrient.toString();
+		}
+		Label colLabel = new Label(labelText);
+		colLabel.setMaxWidth(width);
+		colLabel.getStyleClass().add("thin-label");
+		TextField colField = getNumberOnlyTextField(initialVal);
+		colField.setMaxWidth(width);
+		if (readOnly)
+		{
+			colField.setDisable(true);
+			colField.getStyleClass().add("readonly-textfield");
+		}
+		
+		createdFields.put(nutrient, colField);
+		
+		rtnBox.getChildren().addAll(colLabel, colField);
 		return rtnBox;
 	}
 	

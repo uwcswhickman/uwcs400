@@ -92,6 +92,11 @@ ListView {
 
 .thin-vbox {
 	-fx-padding: 0px;
+	-fx-border-width:0px;
+}
+
+.thin-label {
+	-fx-padding: 0px;
 }
 
 .number-field {
