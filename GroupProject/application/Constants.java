@@ -8,9 +8,13 @@ package application;
  */
 public class Constants {
 	
-	public static final int IDLENGTH = 24;
+	public static final int IdLength = 24;
 	
-	public static final String InitialDataPath = System.getProperty("user.dir") + "\\foodItems.csv";
+	public static final String CurrentDirectory = System.getProperty("user.dir");
+	
+	public static final String InitialDataPath = CurrentDirectory + "\\foodItems.csv";
+	
+	public static final String DefaultSavePath = CurrentDirectory + "\\mySave.csv";
 	
 	public static final String[] Comparators = new String[] { "<=", "==", ">=" };
 	

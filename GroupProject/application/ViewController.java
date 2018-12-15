@@ -1,13 +1,19 @@
 package application;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.TreeMap;
 
+import application.Constants.Nutrient;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.ListCell;
@@ -56,13 +62,7 @@ public class ViewController {
 		this.foodOptionsLV = new ListView<FoodItem>();
 		this.foodOptionsProperty = new SimpleListProperty<FoodItem>(FXCollections.observableArrayList());
 		this.foodOptionsLV.itemsProperty().bind(foodOptionsProperty);
-		for (FoodItem nxt: this.sessionData.getAllFoodItems())
-		{
-			this.foodOptionsProperty.add(nxt);
-			this.idIndex.add(nxt.getID());
-		}
 		
-
 		// cells will show only the item's name
 		this.foodOptionsLV.setCellFactory(lv -> new ListCell<FoodItem>() {
 		    @Override
@@ -71,6 +71,8 @@ public class ViewController {
 		        setText(item == null ? null : item.getName() );
 		    }
 		});
+		
+		resetFoodOptionsList();
 		
 		// filters list that we'll show in a pop-up
 		this.allFiltersLV = new ListView<String>();
@@ -83,7 +85,7 @@ public class ViewController {
 		this.mealLV = new ListView<FoodItem>();
 		this.mealListProperty = new SimpleListProperty<FoodItem>(FXCollections.observableArrayList());
 		this.mealLV.itemsProperty().bind(mealListProperty);
-
+		
 		// cells will show only the item's name
 		this.mealLV.setCellFactory(lv -> new ListCell<FoodItem>() {
 		    @Override
@@ -92,29 +94,117 @@ public class ViewController {
 		        setText(item == null ? null : item.getName() );
 		    }
 		});
-		
-		System.out.println(GetUniqueID());
+	}
+	
+	private void resetFoodOptionsList()
+	{
+		this.foodOptionsProperty.clear();
+		for (FoodItem nxt: this.sessionData.getAllFoodItems())
+		{
+			this.foodOptionsProperty.add(nxt);
+			this.idIndex.add(nxt.getID());
+		}
+	}
+	
+	private void resetMealList()
+	{
+		this.mealListProperty.clear();
 	}
 	
 	// File I/O
-	public String TrySave(String savePath) throws FileNotFoundException
+	public String TrySave(String filename)
 	{
 		// try to check for path existence
+		File file = new File(filename);
+    	
+    	file.delete();
+    	try 
+		{
+	        if (file.createNewFile())                          
+	        {           
+				FileWriter fw = new FileWriter(file);
+				
+				fw.close();
+	        }
+	        file.delete();
+		}
+		catch (IOException e) 
+    	{ 
+			return "Could not edit file";
+    	}
+    	catch (SecurityException e)
+    	{
+    		return "You do not have the security to access the file specified";
+    	}
+    	catch (Exception e)
+    	{
+    		return "Unexpected exception encountered. Data was not saved.";
+    	}
 		// then actually save
-		// then i guess make sure that the file exists? 
-		throw new FileNotFoundException("Not yet implemented.");
+    	this.sessionData.saveFoodItems(filename);
+		if (file.exists())
+		{
+			return "Data saved successfully";
+		}
+		else
+		{
+			return "Unexpected error encountered. Data was not saved.";
+		}
 	}
 	
-	public String TryLoad(String savePath) throws FileNotFoundException
+	public String TryLoad(String filePath)
 	{
-		// try to check for path existence
-		// then actually load
-		throw new FileNotFoundException("Not yet implemented.");
+		// we're going to do the basic checks that the FoodData load method does, 
+		// but then we can send an error to the user, if we run into trouble
+		try {
+			File file = new File( filePath );
+
+	        if (file.exists())                          
+	        {
+				Scanner scanner = new Scanner(file);
+				
+	            scanner.close();
+	        }
+	        else
+	        {
+	        	return "Could not find file specified";
+	        }
+		}
+		catch (FileNotFoundException e)
+		{
+			return "Could not find file specified";
+		}
+		catch (SecurityException e)
+		{
+			return "You do not have the security to access the file specified";
+		}
+		catch (Exception e)
+		{
+			return "Unexpected exception caught. File was not loaded";
+		}
+		this.sessionData.loadFoodItems(filePath);
+		if (this.sessionData.getAllFoodItems().size() > 0)
+		{
+			resetFoodOptionsList();
+			resetMealList();
+			return "Items loaded";
+		}
+		else
+		{
+			return "No items loaded. Please check the contents of the file specified";
+		}
 	}
 	
-	public String NumItemsLabelMsg()
+	public String GetNumItemsLabelMsg()
 	{
-		return this.sessionData.getAllFoodItems().size() + " items loaded";
+		String rtnStr = this.foodOptionsProperty.size() + " items";
+		
+		if (this.allFiltersProperty.size()>0)
+		{
+			rtnStr += " (filtered)";
+		}
+		
+		return rtnStr;
 	}
 	
 	// Meal methods
@@ -129,6 +219,10 @@ public class ViewController {
 		{
 			this.mealListProperty.add(toAdd);
 		}
+		Collections.sort(this.mealListProperty, (left, right) -> 
+			{ 
+				return left.getName().toLowerCase().compareTo(right.getName().toLowerCase()); 
+			});
 	}
 	
 	public void RemoveFromMeal(FoodItem toRemove)
@@ -139,11 +233,23 @@ public class ViewController {
 	public TreeMap<Constants.Nutrient, Double> GetMealAnalysis()
 	{
 		// add everything up from this.meal and return map
-		return new TreeMap<Constants.Nutrient, Double>();
+		TreeMap<Constants.Nutrient, Double> rtnMap = new TreeMap<Constants.Nutrient, Double>();
+		
+		for (Constants.Nutrient nxtNutrient: Constants.Nutrient.values())
+		{
+			double sum = 0;
+			for (FoodItem nxtItm: this.mealListProperty)
+			{
+				sum += nxtItm.getNutrientValue(nxtNutrient.name());
+			}
+			rtnMap.put(nxtNutrient, sum);
+		}
+		
+		return rtnMap;
 	}
 
 	// filter methods
-	public List<String> GetAllNutrients()
+	public List<String> GetNutrientsAsStringList()
 	{
 		LinkedList<String> rtnList = new LinkedList<String>();
 		for (Constants.Nutrient nxt: Constants.Nutrient.values())
@@ -259,11 +365,51 @@ public class ViewController {
     }
 	
 	// Add food item
-	public boolean AddFoodItem(String name, String calories, String fat, String carbohydrate, String fiber, String protein)
+	public boolean AddFoodItem(String ID, String name, String calories, String fat, String carbohydrate, String fiber, String protein)
 	{
-		// parse all attributes to make sure they're doubles, get a unique ID, and then create FoodItem and add to list
-		
-		return false;
+		if (!isNullOrEmpty(ID) && !isNullOrEmpty(name))
+		{
+			try
+			{
+				FoodItem newItem = new FoodItem(ID, name);
+				parseNutrient(Nutrient.calories, calories, newItem);
+				parseNutrient(Nutrient.fat, fat, newItem);
+				parseNutrient(Nutrient.carbohydrate, carbohydrate, newItem);
+				parseNutrient(Nutrient.fiber, fiber, newItem);
+				parseNutrient(Nutrient.protein, protein, newItem);
+				this.sessionData.addFoodItem(newItem);
+				SortFoodList();
+				ApplyFilters();
+			}
+			catch (Exception e)
+			{
+				return false;
+			}
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	private void parseNutrient(Nutrient nutrient, String value, FoodItem item) throws NumberFormatException
+	{
+		double parsed = Double.parseDouble(value);
+		item.addNutrient(nutrient.toString(), parsed);
+	}
+	
+	private void SortFoodList()
+	{
+		Collections.sort(this.sessionData.getAllFoodItems(), (left, right) -> 
+		{ 
+			return left.getName().toLowerCase().compareTo(right.getName().toLowerCase()); 
+		});
+	}
+	
+	public boolean ValidID(String id)
+	{
+		return !this.idIndex.contains(id);
 	}
 	
 	public String GetUniqueID()
@@ -280,8 +426,8 @@ public class ViewController {
 	
 	private String nxtRandomID()
 	{
-		char[] ID = new char[Constants.IDLENGTH];
-		for (int i = 0; i < Constants.IDLENGTH; i++)
+		char[] ID = new char[Constants.IdLength];
+		for (int i = 0; i < Constants.IdLength; i++)
 		{
 			ID[i] = Constants.HexDigits[rng.nextInt(Constants.HexDigits.length)];
 		}

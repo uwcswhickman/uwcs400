@@ -7,6 +7,7 @@
  *   - https://stackoverflow.com/questions/43508511/hover-and-pressed-in-javafx
  *   - https://stackoverflow.com/questions/39214586/how-to-align-a-button-right-in-javafx
  *   - https://stackoverflow.com/questions/25336796/tooltip-background-with-javafx-css
+ *   - https://stackoverflow.com/questions/20205145/javafx-how-to-show-read-only-text
  */
 
 GridPane {
@@ -78,6 +79,15 @@ ListView {
 	-fx-background-color: transparent;
 	-fx-border-color: rgb(57, 59, 61);
 	-fx-border-radius: 2;
+}
+
+.readonly-textfield {
+	-fx-background-color: transparent;
+	-fx-opacity: 1;
+}
+
+.thin-hbox {
+	-fx-padding: 0px;
 }
 
 .number-field {

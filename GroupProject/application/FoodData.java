@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.TreeMap;
 
 /**
  * This class represents the backend for managing all 
@@ -24,6 +23,9 @@ public class FoodData implements FoodDataADT<FoodItem> {
     
     // List of all the food items.
     private List<FoodItem> foodItemList;
+    
+    // formatter for nutrient values - strips trailing 0s
+    private DecimalFormat numFormatter = new DecimalFormat("0.#");
     
     // hashed set of all of the food items for quick lookup while applying filters
     private HashSet<FoodItem> foodItemLookup;
@@ -101,7 +103,7 @@ public class FoodData implements FoodDataADT<FoodItem> {
      */
     @Override
     public void loadFoodItems(String filePath) {
-        
+    	
     	List<String> rawData = null;
     	try
     	{
@@ -113,9 +115,16 @@ public class FoodData implements FoodDataADT<FoodItem> {
     	}
     	if (rawData != null)
     	{
+    		clearFoodItems();
     		// parse data and add it to our session's food list
         	parseData(rawData);
     	}
+    }
+    
+    private void clearFoodItems()
+    {
+    	this.foodItemList = new LinkedList<FoodItem>();
+        this.foodItemLookup = new HashSet<FoodItem>();
     }
     
     /**
@@ -191,7 +200,7 @@ public class FoodData implements FoodDataADT<FoodItem> {
     	}
     	Collections.sort(this.foodItemList, (left, right) -> 
     		{ 
-    			return left.getName().compareTo(right.getName()); 
+    			return left.getName().toLowerCase().compareTo(right.getName().toLowerCase()); 
     		});
     }
     
@@ -206,7 +215,7 @@ public class FoodData implements FoodDataADT<FoodItem> {
     	
     	LinkedList<FoodItem> rtnList = new LinkedList<FoodItem>();
     	
-    	// hopefully this is a small list (probably just one element), but if search string is 2 or fewer characters, this could take a while
+    	// foodItemList is always sorted by name, so we don't need to sort again
     	for (FoodItem nxt: this.foodItemList)
 		{
 			if (nxt.getName().toLowerCase().contains(substring))
@@ -266,10 +275,6 @@ public class FoodData implements FoodDataADT<FoodItem> {
     public void addFoodItem(FoodItem foodItem) {
         this.foodItemList.add(foodItem);
         this.foodItemLookup.add(foodItem);
-        if (this.foodItemList.size() % 10000 == 0)
-        {
-        	System.out.println("Item " + this.foodItemList.size());
-        }
         // add to the nutrient index
         for (String nutrient: foodItem.getNutrients().keySet())
         {
@@ -294,7 +299,7 @@ public class FoodData implements FoodDataADT<FoodItem> {
      * @param filename name of the file where the data needs to be saved 
      */
     public void saveFoodItems(String filename) {
-    	Collection<String> formattedAndSorted = formatAndSortData(this.foodItemList);
+    	Collection<String> formattedData = formatData(this.foodItemList);
     	
     	File file = new File( filename );
     	
@@ -305,7 +310,7 @@ public class FoodData implements FoodDataADT<FoodItem> {
 	        {           
 				FileWriter fw = new FileWriter(file);
 				
-				for (String nxt: formattedAndSorted)
+				for (String nxt: formattedData)
 				{
 					fw.write(nxt);
 					fw.write("\r\n");
@@ -316,36 +321,34 @@ public class FoodData implements FoodDataADT<FoodItem> {
 		catch (IOException e) { }
     }
     
-    private Collection<String> formatAndSortData(List<FoodItem> list)
+    private Collection<String> formatData(List<FoodItem> list)
     {
-    	
-    	TreeMap<String, String> sortedByName = new TreeMap<String, String>();
-    	
+    	List<String> formattedData = new LinkedList<String>();
     	for (FoodItem nxt: list)
     	{
-    		String key = nxt.getName().toLowerCase() + nxt.getID();
-    		sortedByName.put(key, serializeFoodItem(nxt));
+    		formattedData.add(serializeFoodItem(nxt));
     	}
     	
-    	return sortedByName.values();
+    	return formattedData;
     }
     
-    private static String serializeFoodItem(FoodItem item)
+    private String serializeFoodItem(FoodItem item)
     {
     	StringBuilder sb = new StringBuilder();
 		sb.append(item.getID());
 		sb.append(",");
 		sb.append(item.getName());
-		sb.append(",");
+		
 		HashMap<String, Double> nutrients = item.getNutrients();
 		Constants.Nutrient[] nutrientList = Constants.Nutrient.values();
-		NumberFormat formatter = new DecimalFormat("#0");
 		for (int i = 0; i < nutrientList.length; i++)
 		{
+			sb.append(",");
+			// label
 			sb.append(nutrientList[i]);
 			sb.append(",");
-			sb.append(formatter.format(nutrients.get(nutrientList[i].toString())));
-			sb.append(",");
+			// amount - use formatter to drop trailing zeros
+			sb.append(this.numFormatter.format(nutrients.get(nutrientList[i].toString())));
 		}
 		return sb.toString();
     }

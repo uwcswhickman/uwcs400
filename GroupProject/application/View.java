@@ -1,6 +1,9 @@
 package application;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.TreeMap;
 
+import application.Constants.Nutrient;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -23,12 +26,13 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
 /**
  * Resources
  * Pop-up implementation from here: https://stackoverflow.com/questions/22166610/how-to-create-a-popup-windows-in-javafx
- * numeric text field from here: https://stackoverflow.com/questions/7555564/what-is-the-recommended-way-to-make-a-numeric-textfield-in-javafx
+ * numeric text field from here: https://stackoverflow.com/questions/40485521/javafx-textfield-validation-decimal-value
  * focus and selection clearing in listviews - https://stackoverflow.com/questions/51520325/clear-selection-when-tableview-loses-focus
  * focus and selection - https://stackoverflow.com/questions/17522686/javafx-tabpane-how-to-listen-to-selection-changes
  * Styling tips from combination of various sources including
@@ -64,6 +68,7 @@ public class View extends Application {
 	private Stage primaryStage;
 	private ListView<FoodItem> optionsList;
 	private ListView<FoodItem> meal;
+	private Label numItemsLoaded;
 	
 	public static void main(String[] args) {
 		launch(args);
@@ -101,6 +106,7 @@ public class View extends Application {
 			
 			// set title and show
 			primaryStage.setTitle("Meal Analysis App");
+			primaryStage.setResizable(false);
 			primaryStage.setScene(scene);
 			primaryStage.show();
 		}
@@ -120,6 +126,10 @@ public class View extends Application {
 		rtnBox.setPadding(new Insets(5, 5, 5, 5));
 		Label lblOptions = new Label("Food Options");
 		lblOptions.setFont(Font.font("Ariel", 18));
+		Pane spacer = new Pane();
+	    HBox.setHgrow(spacer, Priority.ALWAYS);
+	    this.numItemsLoaded = new Label();
+	    SetNumItemsMsg();
 		Button btnLoadList = newButton("Load List", "btnLoadList", true);
 		btnLoadList.setTooltip(new Tooltip("Load new options list from a file"));
 		btnLoadList.setOnAction(
@@ -146,9 +156,8 @@ public class View extends Application {
 				});
 		rtnBox.setMinHeight(topHeight);
 		rtnBox.setMinWidth(leftWidth);
-		Pane spacer = new Pane();
-	    HBox.setHgrow(spacer, Priority.ALWAYS);
-		rtnBox.getChildren().addAll(lblOptions, spacer, btnLoadList, btnSaveList);
+		
+		rtnBox.getChildren().addAll(lblOptions, spacer, this.numItemsLoaded, btnLoadList, btnSaveList);
 		return rtnBox;
 	}
 	
@@ -215,6 +224,7 @@ public class View extends Application {
 					{
 						controller.ClearRules();
 						controller.ApplyFilters();
+						SetNumItemsMsg();
 					}
 				});
 		Pane spacer = new Pane();
@@ -431,15 +441,14 @@ public class View extends Application {
 		Scene filterScene = new Scene(root);
 		// add standard styling to make it look consistent
 		filterScene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
-		Stage filters = new Stage();
+		Stage filters = newStage("Filters");
 		// make modal and set app's primary stage as the owner
-		filters.initModality(Modality.APPLICATION_MODAL);
 		filters.initOwner(this.primaryStage);
-		filters.setTitle("Filters");
 		filters.setScene(filterScene);
 		filters.setOnHidden(new EventHandler<WindowEvent>() {
 	          public void handle(WindowEvent we) {
 	              controller.ApplyFilters();
+	              SetNumItemsMsg();
 	          }
 	      });
 		
@@ -453,7 +462,7 @@ public class View extends Application {
 		HBox attFilterRow = new HBox();
 		ComboBox<String> attSelector = new ComboBox<String>();
 		// add all attributes from the Nutrient enum: calories, fat, carbohydrate, fiber, protein;
-		attSelector.getItems().addAll(controller.GetAllNutrients());
+		attSelector.getItems().addAll(controller.GetNutrientsAsStringList());
 		attSelector.setValue(controller.GetDefaultNutrient()); // first entry in the list
 		
 		ComboBox<String> comparatorSelector = new ComboBox<String>();
@@ -461,17 +470,7 @@ public class View extends Application {
 		comparatorSelector.getItems().addAll(controller.GetAllComparators());
 		comparatorSelector.setValue(controller.GetDefaultComparator()); // first entry in the list
 		// value to compare to
-		TextField val = new TextField();
-		// make it numeric only
-		val.textProperty().addListener(new ChangeListener<String>() {
-		    @Override
-		    public void changed(ObservableValue<? extends String> observable, String oldValue, 
-		        String newValue) {
-		        if (!newValue.matches("\\d*")) {
-		        	val.setText(newValue.replaceAll("[^\\d]", ""));
-		        }
-		    }
-		});
+		TextField val = getNumberOnlyTextField(0d);
 		val.getStyleClass().add("number-field");
 		val.setMaxWidth(45);
 		val.setMaxHeight(45);
@@ -564,227 +563,244 @@ public class View extends Application {
 	
 	private Stage GetLoadPopUp()
 	{
-		Stage loadList = new Stage();
+		Stage loadStage = newStage("Load Data");
 		
 		VBox root = new VBox();
 		Scene loadScene = new Scene(root);
 		loadScene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
-		loadList.setScene(loadScene);
+		loadStage.setScene(loadScene);
 		
 		// header text
 		HBox row1 = new HBox();
-		Label fileName = new Label("Load data from file:");
-		row1.getChildren().add(fileName);
-		root.getChildren().add(row1);
-				
+		Label loadLabel = new Label("Load data from file:");
+		row1.getChildren().add(loadLabel);
+		
 		// file entry
 		HBox row2 = new HBox();
-		TextField fileField = new TextField();
+		TextField fileField = new TextField(Constants.InitialDataPath);
 		fileField.setMaxHeight(45);
-		Button btnLoadFile = newButton("Load", "btnLoadFile", false);
+		fileField.setMinWidth(500);
+		fileField.setId("fileField");
+		Button btnLoadFile = newButton("Load", "btnLoadFile", true);
+		row2.getChildren().addAll(fileField, btnLoadFile);
+		
+		HBox row3 = new HBox();
+		Pane spacer = new Pane();
+		HBox.setHgrow(spacer, Priority.ALWAYS);
+		Label msgLabel = new Label("Enter a file path");
+		msgLabel.setId("msgLabel");
+		row3.getChildren().addAll(spacer, msgLabel);
+		
 		btnLoadFile.setOnAction(
 				new EventHandler<ActionEvent>()
 				{
 					@Override
 					public void handle(ActionEvent event)
 					{
-						try {
-							controller.TryLoad(fileField.getText());
-						} catch (FileNotFoundException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+						msgLabel.setText(controller.TryLoad(fileField.getText()));
+						SetNumItemsMsg();
 					}
 				});
+		fileField.textProperty().addListener(
+				new ChangeListener<String>() {
+			        @Override
+			        public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+			            msgLabel.setText("");
+			        }
+				});
 		
-		row2.getChildren().addAll(fileField, btnLoadFile);
-		root.getChildren().add(row2);
-		return loadList;
+		root.getChildren().addAll(row1, row2, row3);
+		return loadStage;
+	}
+	
+	private void SetNumItemsMsg()
+	{
+		this.numItemsLoaded.setText(controller.GetNumItemsLabelMsg());
 	}
 	
 	private Stage GetSavePopUp()
 	{
-		Stage saveList = new Stage();
+		Stage saveStage = newStage("Save Data");
 		
 		VBox root = new VBox();
 		Scene saveScene = new Scene(root);
 		saveScene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
-		saveList.setScene(saveScene);
+		saveStage.setScene(saveScene);
 		
 		// header text
 		HBox row1 = new HBox();
-		Label fileName = new Label("Filepath:");
-		row1.getChildren().add(fileName);
-		root.getChildren().add(row1);
-				
+		Label fileLabel = new Label("Save data to file:");
+		row1.getChildren().add(fileLabel);
+		
 		// file entry
 		HBox row2 = new HBox();
-		TextField fileField = new TextField();
+		TextField fileField = new TextField(Constants.DefaultSavePath);
 		fileField.setMaxHeight(45);
-		Button btnSaveFile = newButton("Save", "btnSaveFile", false);
+		fileField.setMinWidth(500);
+		Button btnSaveFile = newButton("Save", "btnSaveFile", true);
+		
+		row2.getChildren().addAll(fileField, btnSaveFile);
+		
+		HBox row3 = new HBox();
+		Pane spacer = new Pane();
+		HBox.setHgrow(spacer, Priority.ALWAYS);
+		Label msgLabel = new Label("Enter a file path");
+		msgLabel.setId("msgLabel");
+		row3.getChildren().addAll(spacer, msgLabel);
+		
 		btnSaveFile.setOnAction(
 				new EventHandler<ActionEvent>()
 				{
 					@Override
 					public void handle(ActionEvent event)
 					{
-						try {
-							controller.TrySave(fileField.getText());
-						} catch (FileNotFoundException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+						msgLabel.setText(controller.TrySave(fileField.getText()));
 					}
 				});
 		
-		row2.getChildren().addAll(fileField, btnSaveFile);
-		root.getChildren().add(row2);
-		return saveList;
+		fileField.textProperty().addListener(
+				new ChangeListener<String>() {
+			        @Override
+			        public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+			            msgLabel.setText("");
+			        }
+				});
+		root.getChildren().addAll(row1, row2, row3);
+		
+		return saveStage;
 	}
 	
 	private Stage GetNewItemPopUp()
 	{
-		Stage newItem = new Stage();
+		Stage newItemStage = newStage("New Item");
 		
 		VBox root = new VBox();
-		Scene newItemScene = new Scene(root);
-		newItemScene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
-		newItem.setScene(newItemScene);
 		
-		// header text
-		HBox row1 = new HBox();
-		Label fileName = new Label("Add new item:");
-		row1.getChildren().add(fileName);
-		root.getChildren().add(row1);
-				
-		// item name field
-		HBox row2 = new HBox();
-		Label itemName = new Label("Name:     ");
-		TextField itemField = new TextField();
-		itemField.setMaxHeight(45);
-		row2.getChildren().addAll(itemName,itemField);
-		root.getChildren().add(row2);
+		HBox idRow = new HBox();
+		Label idLabel = new Label("ID");
+		Pane idSpacer = new Pane();
+		HBox.setHgrow(idSpacer, Priority.ALWAYS);
+		TextField idField = new TextField(controller.GetUniqueID());
+		idField.setMinWidth(500);
+		idRow.getChildren().addAll(idLabel, idSpacer, idField);
 		
-		// item calories, fat, carbs
-		HBox row3 = new HBox();
-		Label itemCals = new Label("Calories:  ");
-		TextField itemCalsField = new TextField();
-		itemCalsField.setMaxHeight(45);
-		Label itemFat = new Label("Fat:       ");
-		TextField itemFatField = new TextField();
-		itemFatField.setMaxHeight(45);
-		Label itemCarbs = new Label("Carbs:    ");
-		TextField itemCarbsField = new TextField();
-		itemCarbsField.setMaxHeight(45);
-		row3.getChildren().addAll(itemCals,itemCalsField,itemFat,itemFatField,itemCarbs,itemCarbsField);
-		root.getChildren().add(row3);
+		HBox nameRow = new HBox();
+		Label nameLabel = new Label("Name");
+		Pane nameSpacer = new Pane();
+		HBox.setHgrow(nameSpacer, Priority.ALWAYS);
+		TextField nameField = new TextField();
+		nameField.setMinWidth(500);
+		nameRow.getChildren().addAll(nameLabel, nameSpacer, nameField);
 		
-		// item protein, fiber, Add button
-		HBox row4 = new HBox();
-		Label itemProtein = new Label("Protein:   ");
-		TextField itemProteinField = new TextField();
-		itemProteinField.setMaxHeight(45);
-		Label itemFiber = new Label("Fiber:    ");
-		TextField itemFiberField = new TextField();
-		itemFiberField.setMaxHeight(45);
-		Button btnAdd = newButton("Add", "btnAdd", false);
-		btnAdd.setOnAction(
+		HBox nutrientRow = new HBox();
+		TreeMap<Nutrient, TextField> createdFields = new TreeMap<Nutrient, TextField>();
+		VBox nutrientVals = getNutrientsDisplay(getZerosInitialVals(), createdFields, false);
+		HBox btnContainer = new HBox();
+		Pane buttonSpacer = new Pane();
+		HBox.setHgrow(buttonSpacer, Priority.ALWAYS);
+		btnContainer.setAlignment(Pos.BOTTOM_RIGHT);
+		Button addButton = newButton("Add Item", "btnAddItmFromPopup", true); 
+		addButton.setOnAction(
 				new EventHandler<ActionEvent>()
 				{
 					@Override
 					public void handle(ActionEvent event)
 					{
-						// TODO: add event
+						String ID = idField.getText();
+						String name = nameField.getText();
+						String calories = createdFields.get(Nutrient.calories).getText();
+						String fat = createdFields.get(Nutrient.fat).getText();
+						String carbohydrate = createdFields.get(Nutrient.carbohydrate).getText();
+						String fiber = createdFields.get(Nutrient.fiber).getText();
+						String protein = createdFields.get(Nutrient.protein).getText();
+						
+						controller.AddFoodItem(ID, name, calories, fat, carbohydrate, fiber, protein);
+						SetNumItemsMsg();
+						newItemStage.close();
 					}
 				});
+		btnContainer.getChildren().add(addButton);
+		nutrientRow.getChildren().addAll(nutrientVals, buttonSpacer, btnContainer);
 		
-		row4.getChildren().addAll(itemProtein,itemProteinField,itemFiber,itemFiberField,btnAdd);
-		root.getChildren().add(row4);
+		root.getChildren().addAll(idRow, nameRow, nutrientRow);
 		
-		return newItem;
+		Scene newItemScene = new Scene(root);
+		newItemScene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
+		newItemStage.setScene(newItemScene);
+		
+		return newItemStage;
+	}
+	
+	private TreeMap<Nutrient, Double> getZerosInitialVals()
+	{
+		TreeMap<Nutrient, Double> rtnMap = new TreeMap<Nutrient, Double>();
+		
+		for (Nutrient nxt: Constants.Nutrient.values())
+		{
+			rtnMap.put(nxt, 0d);
+		}
+		
+		return rtnMap;
+	}
+	
+	private VBox getNutrientsDisplay(TreeMap<Nutrient, Double> initialVals, TreeMap<Nutrient, TextField> createdFields, boolean readOnly)
+	{
+		VBox rtnBox = new VBox();
+		for (Nutrient nxt: Constants.Nutrient.values())
+		{
+			HBox nxtRow = getAddItemRow(nxt, initialVals.get(nxt), createdFields, readOnly);
+			rtnBox.getChildren().add(nxtRow);
+		}
+		return rtnBox;
+	}
+	
+	private VBox getStackedUserInputBox(String labelText)
+	{
+		VBox rtnBox = new VBox();
+		rtnBox.getStyleClass().add("thin-vbox");
+		Label rowLabel = new Label(labelText);
+		rowLabel.setMinWidth(100);
+		TextField rowField = new TextField();
+		rowField.setMinWidth(100);
+		rtnBox.getChildren().addAll(rowLabel, rowField);
+		return rtnBox;
+	}
+	
+	private HBox getAddItemRow(Nutrient nutrient, Double initialVal, TreeMap<Nutrient, TextField> createdFields, boolean readOnly)
+	{
+		HBox rtnRow = new HBox();
+		rtnRow.getStyleClass().add("thin-hbox");
+		Label rowLabel = new Label(nutrient.toString());
+		Pane spacer = new Pane();
+	    HBox.setHgrow(spacer, Priority.ALWAYS);
+		TextField rowField = getNumberOnlyTextField(initialVal);
+		if (readOnly)
+		{
+			rowField.setDisable(true);
+			rowField.getStyleClass().add("readonly-textfield");
+		}
+		rowField.setMaxWidth(60);
+		
+		createdFields.put(nutrient, rowField);
+		
+		rtnRow.getChildren().addAll(rowLabel, spacer, rowField);
+		return rtnRow;
 	}
 	
 	private Stage GetAnalysisPopUp()
 	{
-		Stage analysis = new Stage();
+		Stage analysis = newStage("Meal Analysis");
 		
-		VBox root = new VBox();
+		TreeMap<Nutrient, Double> nutrientSums = controller.GetMealAnalysis();
+		TreeMap<Nutrient, TextField> createdFields = new TreeMap<Nutrient, TextField>();
+		VBox root = getNutrientsDisplay(nutrientSums, createdFields, true);
+		
 		Scene analysisScene = new Scene(root);
 		analysisScene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
 		analysis.setScene(analysisScene);
 		
-		
-		// header text
-		HBox row1 = new HBox();
-		Label fileName = new Label("Meal Analysis");
-		row1.getChildren().add(fileName);
-		root.getChildren().add(row1);
-				
-		// nutrient fields
-		HBox row2 = new HBox();
-		Label cals = new Label("Calories: ");
-		TextField calsField = new TextField();
-		calsField.setMaxHeight(45);
-		row2.getChildren().addAll(cals, calsField);
-		root.getChildren().add(row2);
-		
-		HBox row3 = new HBox();
-		Label fat = new Label("Fat:         ");
-		TextField fatField = new TextField();
-		calsField.setMaxHeight(45);
-		row3.getChildren().addAll(fat, fatField);
-		root.getChildren().add(row3);
-		
-		HBox row4 = new HBox();
-		Label carbs = new Label("Carbs:     ");
-		TextField carbsField = new TextField();
-		carbsField.setMaxHeight(45);
-		row4.getChildren().addAll(carbs, carbsField);
-		root.getChildren().add(row4);
-		
-		HBox row5 = new HBox();
-		Label protein = new Label("Protein:  ");
-		TextField proteinField = new TextField();
-		proteinField.setMaxHeight(45);
-		row5.getChildren().addAll(protein, proteinField);
-		root.getChildren().add(row5);
-		
-		HBox row6 = new HBox();
-		Label fiber = new Label("Fiber:      ");
-		TextField fiberField = new TextField();
-		fiberField.setMaxHeight(45);
-		row6.getChildren().addAll(fiber, fiberField);
-		root.getChildren().add(row6);
-		
 		return analysis;
 		
-	}
-	/**
-	 * Outline for a pop-up. See the btnFilters declaration in GetAddRemoveItems for 
-	 * an example of how to use this tag to launch your pop-up
-	 * @return
-	 */
-	private Stage popupOutline()
-	{
-		VBox root = new VBox();
-		
-		HBox firstRow = new HBox();
-		Label firstRowLabel = new Label("First row");
-		TextField firstRowField = new TextField();
-		firstRowField.setMaxHeight(45); // this makes it the same height as buttons and labels, so it looks nice
-		firstRow.getChildren().addAll(firstRowLabel, firstRowField);
-		
-		root.getChildren().add(firstRow);
-		
-		Scene scene = new Scene(root);
-		// add standard styling to make it look consistent
-		scene.getStylesheets().add(getClass().getResource("Styles.css").toExternalForm());
-		Stage rtnStage = new Stage();
-		rtnStage.initModality(Modality.APPLICATION_MODAL);
-		rtnStage.initOwner(this.primaryStage);
-		rtnStage.setTitle("Pop-up Title");
-		rtnStage.setScene(scene);
-		return rtnStage;
 	}
 	
 	private Button newButton(String btnCaption, String ID, boolean enforceMinWidth)
@@ -797,5 +813,35 @@ public class View extends Application {
 		}
 		
 		return rtnButton;
+	}
+	
+	private TextField getNumberOnlyTextField(Double initialVal)
+	{
+		TextField rtnField = new TextField(initialVal.toString());
+		
+		rtnField.textProperty().addListener(new ChangeListener<String>() {
+	        @Override
+	        public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+	            // check that it's either a numeral or a numeral. or numeral.numeral
+	        	if (!newValue.matches("\\d*(\\.\\d*)?")) {
+	        		rtnField.setText(oldValue);
+	            }
+	        }
+	    });
+		
+		return rtnField;
+	}
+	/*
+	 * Get a new stage that's modal + not resizable
+	 * @param title - the title for the new stage
+	 * @return new stage with title set, modal = true, & resizable = false
+	 */
+	private Stage newStage(String title)
+	{
+		Stage rtnStage = new Stage();
+		rtnStage.setResizable(false);
+		rtnStage.setTitle(title);
+		rtnStage.initModality(Modality.APPLICATION_MODAL);
+		return rtnStage;
 	}
 }
