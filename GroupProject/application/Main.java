@@ -741,7 +741,7 @@ public class Main extends Application {
 						}
 						else
 						{
-							addMsg.setText("ID & Name must not be blank");
+							addMsg.setText("All fields must be populated");
 						}
 					}
 				});
