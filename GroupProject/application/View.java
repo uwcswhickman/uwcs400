@@ -373,35 +373,7 @@ public class View extends Application {
 		//Clear Button for meal list
 		Button btnClear = newButton("Clear", "btnClear", true);
 		btnClear.setTooltip(new Tooltip("Clear items from meal list"));
-		meal.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<FoodItem>() {
-		    @Override
-		    public void changed(ObservableValue<? extends FoodItem> observable, FoodItem oldVal, FoodItem newVal)
-		    {
-		        if (meal.isFocused() && (newVal != null))
-		        {
-		        	// if meal list has focus, enable the clear button
-		        	btnClear.setDisable(false);
-		        }
-		        else if (!btnClear.isFocused())
-		        {
-		        	// if it doesn't have focus, disable the clear button
-		        	btnClear.setDisable(true);
-		        }
-		    }
-		});
-		meal.focusedProperty().addListener(new ChangeListener<Boolean>() {
-			
-			public void changed(ObservableValue<? extends Boolean> obs, Boolean oldVal, Boolean newVal) 
-			{
-			    if (newVal && (meal.selectionModelProperty().getValue().getSelectedItem() != null)) {
-			    	btnClear.setDisable(false);
-			    }
-			    else if (!btnClear.isFocused())
-			    {
-			    	btnClear.setDisable(true);
-			    }
-			}
-		});
+		
 		btnClear.setOnAction(
 				new EventHandler<ActionEvent>()
 				{
@@ -409,13 +381,8 @@ public class View extends Application {
 					public void handle(ActionEvent event)
 					{
 						
-//						FoodItem selected = meal.getSelectionModel().selectedItemProperty().getValue();
-//						while (selected != null)
-//							controller.RemoveFromMeal(selected);
-						
 						meal.getItems().clear();
 						
-							btnClear.setDisable(true); // disable the clear button after clicked. 
 					}
 				});
 		Pane spacer = new Pane();
