@@ -33,22 +33,6 @@ public class FoodData implements FoodDataADT<FoodItem> {
     // Map of nutrients and their corresponding index
     private HashMap<String, BPTree<Double, FoodItem>> indexes;
     
-    private boolean limitItemsToLoad = false;
-    
-    private int toLoad;
-    
-    // ToDo: Remove before submitting!
-    public void SetNumToLoad(int toLoad)
-    {
-    	this.limitItemsToLoad = true;
-    	this.toLoad = toLoad;
-    }
-    
-    public String printNutrientIdx(String nutrient)
-    {
-    	return this.indexes.get(nutrient).toString();
-    }
-        
     /**
      * Public constructor
      */
@@ -59,25 +43,9 @@ public class FoodData implements FoodDataADT<FoodItem> {
         this.indexes = new HashMap<String, BPTree<Double, FoodItem>>();
         for (Constants.Nutrient nxt: Constants.Nutrient.values())
         {
-        	this.indexes.put(nxt.toString(), new BPTree<Double, FoodItem>(3));
+        	this.indexes.put(nxt.toString(), new BPTree<Double, FoodItem>(25));
         }
     }
-    
-    /**
-     * ToDo: Delete before submitting
-     * @param branchingFactor
-     */
-    public FoodData(int branchingFactor) 
-    {
-    	this.foodItemList = new LinkedList<FoodItem>();
-        this.foodItemLookup = new HashSet<FoodItem>();
-        this.indexes = new HashMap<String, BPTree<Double, FoodItem>>();
-        for (Constants.Nutrient nxt: Constants.Nutrient.values())
-        {
-        	this.indexes.put(nxt.toString(), new BPTree<Double, FoodItem>(branchingFactor));
-        }
-    }
-    
     
     /**
      * Loads the data in the .csv file
@@ -144,22 +112,11 @@ public class FoodData implements FoodDataADT<FoodItem> {
         {
 			Scanner inFile = new Scanner(file);
 			
-			if (this.limitItemsToLoad)
-			{
-	            while (inFile.hasNextLine() && rtnList.size() <= this.toLoad)
-	            {
-	                rtnList.add(inFile.nextLine());
-	            }
-			}
-			else
-			{
-				while (inFile.hasNextLine())
-	            {
-	                rtnList.add(inFile.nextLine());
-	            }
-			}
-			
-            inFile.close();
+			while (inFile.hasNextLine())
+            {
+                rtnList.add(inFile.nextLine());
+            }
+			inFile.close();
         }
         return rtnList;
     }
@@ -352,59 +309,4 @@ public class FoodData implements FoodDataADT<FoodItem> {
 		}
 		return sb.toString();
     }
-    
-    public static void main(String[] args) {
-    	FoodData data = new FoodData();
-    	data.loadFoodItems(Constants.InitialDataPath);
-    	List<FoodItem> allItems = data.getAllFoodItems();
-    	System.out.println(allItems.size() + " items loaded");
-    	testNameSearch(data, "aigR");
-    	testRules(data);
-    	testSaveData(data);
-    }
-    
-    private static void testSaveData(FoodData data)
-    {
-    	data.saveFoodItems("C:\\WillSource\\CS400\\uwcs400\\GroupProject\\foodItemsMySave.csv");
-    }
-    
-    private static void testNameSearch(FoodData data, String toFind)
-    {
-    	System.out.println("Items containing string \"" + toFind + "\"");
-    	List<FoodItem> byName = data.filterByName(toFind);
-    	for (FoodItem nxt: byName)
-    	{
-    		System.out.println(nxt.getName());
-    	}
-    	System.out.println();
-    }
-    
-    private static void testRules(FoodData data)
-    {
-    	System.out.println("Items passing the following rules:");
-    	List<String> rules = new LinkedList<String>();
-    	rules.add("calories <= 50");
-    	rules.add("calories >= 50");
-    	
-    	rules.add("calories == 50");
-    	
-    	for (String nxt: rules)
-    	{
-    		System.out.println(nxt);
-    	}
-    	List<FoodItem> filteredData = data.filterByNutrients(rules);
-    	System.out.println("Found " + filteredData.size() + " items");
-    	for (FoodItem nxt: filteredData)
-    	{
-    		System.out.println(printHelper(nxt, "calories"));
-    	}
-    	System.out.println(data.indexes.get("calories").toString());
-    	System.out.println();
-    }
-    
-    private static String printHelper(FoodItem item, String toShow)
-    {
-    	return item.getName() + ": " + item.getNutrientValue(toShow);
-    }
-
 }
