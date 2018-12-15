@@ -1,8 +1,21 @@
-package application;
-import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.TreeMap;
+/**
+ * Filename:   Main.java
+ * Project:    Group Project
+ * Authors:    sapan (sapan@cs.wisc.edu), Soua Lor, Maria Helgeson, Daniel Walter, & Will Hickman
+ *
+ * Semester:   Fall 2018
+ * Course:     CS400 - Lecutre 46373
+ * 
+ * Due Date:   12/16/18
+ * Version:    1.0
+ * 
+ * Credits:    N/A
+ * 
+ * Bugs:       No known bugs
+ */
 
+package application;
+import java.util.TreeMap;
 import application.Constants.IOMessage;
 import application.Constants.Nutrient;
 import javafx.application.Application;
@@ -30,7 +43,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
 /**
@@ -706,6 +718,7 @@ public class Main extends Application {
 		HBox btnRow = new HBox();
 		Pane buttonSpacer = new Pane();
 		HBox.setHgrow(buttonSpacer, Priority.ALWAYS);
+		Label addMsg = new Label();
 		Button addButton = newButton("Add Item", "btnAddItmFromPopup", true); 
 		addButton.setOnAction(
 				new EventHandler<ActionEvent>()
@@ -721,12 +734,18 @@ public class Main extends Application {
 						String fiber = createdFields.get(Nutrient.fiber).getText();
 						String protein = createdFields.get(Nutrient.protein).getText();
 						
-						controller.AddFoodItem(ID, name, calories, fat, carbohydrate, fiber, protein);
-						SetNumItemsMsg();
-						newItemStage.close();
+						if (controller.AddFoodItem(ID, name, calories, fat, carbohydrate, fiber, protein))
+						{
+							SetNumItemsMsg();
+							newItemStage.close();
+						}
+						else
+						{
+							addMsg.setText("ID & Name must not be blank");
+						}
 					}
 				});
-		btnRow.getChildren().addAll(buttonSpacer, addButton);
+		btnRow.getChildren().addAll(buttonSpacer, addMsg, addButton);
 		
 		root.getChildren().addAll(idRow, nameRow, nutrientRow, btnRow);
 		
